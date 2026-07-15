@@ -19,6 +19,21 @@ export function MenteeDashboard() {
   // AI Summary State
   const [aiSummary, setAiSummary] = useState<any>(null);
 
+  // Added States for Button Interactivity
+  const [weekOffset, setWeekOffset] = useState(0);
+  const [expandedReqId, setExpandedReqId] = useState<string | null>(null);
+
+  // Date Calculation
+  const getWeekDates = (offset: number) => {
+    const start = new Date(2024, 6, 14); // Baseline July 14, 2024 as per design
+    start.setDate(start.getDate() + (offset * 7));
+    const end = new Date(start);
+    end.setDate(end.getDate() + 6);
+    
+    const formatOpts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
+    return `${start.toLocaleDateString('en-US', formatOpts)} — ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+  };
+
   const fetchData = useCallback(async () => {
     try {
       const [reqsData, availData, aiData] = await Promise.all([
@@ -105,11 +120,17 @@ export function MenteeDashboard() {
                 <p className="text-sm text-text-muted mt-1">Select slots to indicate when you are free for mentoring sessions.</p>
               </div>
               <div className="flex items-center gap-4">
-                <button className="w-8 h-8 rounded border border-border-subtle flex items-center justify-center hover:bg-surface-container-low transition-colors">
+                <button 
+                  onClick={() => setWeekOffset(prev => prev - 1)}
+                  className="w-8 h-8 rounded border border-border-subtle flex items-center justify-center hover:bg-surface-container-low transition-colors"
+                >
                    <ChevronLeft size={16} className="text-primary" />
                 </button>
-                <span className="text-sm font-bold text-primary">July 14 — 20, 2024</span>
-                <button className="w-8 h-8 rounded border border-border-subtle flex items-center justify-center hover:bg-surface-container-low transition-colors">
+                <span className="text-sm font-bold text-primary w-[140px] text-center">{getWeekDates(weekOffset)}</span>
+                <button 
+                  onClick={() => setWeekOffset(prev => prev + 1)}
+                  className="w-8 h-8 rounded border border-border-subtle flex items-center justify-center hover:bg-surface-container-low transition-colors"
+                >
                    <ChevronRight size={16} className="text-primary" />
                 </button>
               </div>
@@ -206,7 +227,12 @@ export function MenteeDashboard() {
                 <p className="text-xs text-white/90 mb-6 leading-relaxed max-w-[90%]">
                   Based on your recent availability, we found {aiSummary.matchCount} mentors in your timezone specializing in your requested skills.
                 </p>
-                <button className="bg-white text-primary text-xs font-bold px-4 py-2.5 rounded shadow hover:bg-surface transition-colors">
+                <button 
+                  onClick={() => {
+                     document.getElementById('my-requests-section')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="bg-white text-primary text-xs font-bold px-4 py-2.5 rounded shadow hover:bg-surface transition-colors"
+                >
                   View Matches
                 </button>
               </div>
@@ -217,10 +243,15 @@ export function MenteeDashboard() {
       </div>
 
       {/* My Requests (Full Width Bottom) */}
-      <div className="mt-8 bg-surface-container-lowest border border-border-subtle rounded-lg shadow-sm w-full">
+      <div id="my-requests-section" className="mt-8 bg-surface-container-lowest border border-border-subtle rounded-lg shadow-sm w-full">
         <div className="p-6 border-b border-border-subtle flex items-center justify-between">
           <h3 className="text-lg font-bold text-primary">My Requests</h3>
-          <a href="#" className="text-xs font-bold text-blue-500 hover:underline">View All History</a>
+          <button 
+            onClick={() => alert("Full history view is in development.")}
+            className="text-xs font-bold text-blue-500 hover:underline bg-transparent border-none p-0 cursor-pointer"
+          >
+            View All History
+          </button>
         </div>
         
         <div className="overflow-x-auto">
@@ -241,36 +272,58 @@ export function MenteeDashboard() {
                 </tr>
               ) : (
                 requirements.map(req => (
-                  <tr key={req.id} className="border-b border-border-subtle last:border-0 hover:bg-surface-container-low">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded bg-blue-100 flex items-center justify-center text-blue-600">
-                          <FileText size={16} />
+                  <React.Fragment key={req.id}>
+                    <tr className="border-b border-border-subtle last:border-0 hover:bg-surface-container-low">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded bg-blue-100 flex items-center justify-center text-blue-600">
+                            <FileText size={16} />
+                          </div>
+                          <span className="font-bold text-primary text-xs">{req.call_type.replace(/_/g, ' ')}</span>
                         </div>
-                        <span className="font-bold text-primary text-xs">{req.call_type.replace(/_/g, ' ')}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-text-muted text-xs">
-                      {new Date(req.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                    </td>
-                    <td className="px-6 py-4">
-                      {req.status === 'pending' ? (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-600 border border-amber-200">
-                          Pending
-                        </span>
-                      ) : (
-                        <TagPill label={req.status} color="green" />
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-text-muted text-xs">
-                       {req.status === 'pending' ? 'Matching in progress...' : 'Matched'}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                       <button className="w-10 h-10 rounded bg-primary text-white flex items-center justify-center ml-auto hover:bg-primary/90 transition-colors shadow">
-                          <Plus size={20} />
-                       </button>
-                    </td>
-                  </tr>
+                      </td>
+                      <td className="px-6 py-4 text-text-muted text-xs">
+                        {new Date(req.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                      </td>
+                      <td className="px-6 py-4">
+                        {req.status === 'pending' ? (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-600 border border-amber-200">
+                            Pending
+                          </span>
+                        ) : (
+                          <TagPill label={req.status} color="green" />
+                        )}
+                      </td>
+                      <td className="px-6 py-4 text-text-muted text-xs">
+                         {req.status === 'pending' ? 'Matching in progress...' : 'Matched'}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                         <button 
+                           onClick={() => setExpandedReqId(expandedReqId === req.id ? null : req.id)}
+                           className="w-10 h-10 rounded bg-primary text-white flex items-center justify-center ml-auto hover:bg-primary/90 transition-colors shadow"
+                         >
+                            <Plus size={20} className={`transition-transform duration-200 ${expandedReqId === req.id ? 'rotate-45' : ''}`} />
+                         </button>
+                      </td>
+                    </tr>
+                    {expandedReqId === req.id && (
+                      <tr className="bg-surface-container-lowest border-b border-border-subtle">
+                         <td colSpan={5} className="px-6 py-4">
+                            <div className="text-sm p-4 bg-surface rounded-lg border border-border-subtle">
+                               <p className="font-bold text-primary mb-2">Request Context:</p>
+                               <p className="text-text-muted italic mb-4">"{req.description}"</p>
+                               <div className="flex items-center gap-2">
+                                  <span className="text-xs font-bold text-primary">Required Tags:</span>
+                                  <div className="flex gap-2">
+                                     {(req.user_tags || []).map((t: string) => <TagPill key={t} label={t} color="gray" />)}
+                                     {(!req.user_tags || req.user_tags.length === 0) && <span className="text-xs text-text-muted">None specified</span>}
+                                  </div>
+                               </div>
+                            </div>
+                         </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
                 ))
               )}
             </tbody>

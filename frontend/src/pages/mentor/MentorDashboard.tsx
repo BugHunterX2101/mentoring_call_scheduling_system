@@ -9,6 +9,18 @@ export function MentorDashboard() {
   const [bookings, setBookings] = useState<any[]>([]);
   const [slots, setSlots] = useState<TimeSlot[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  
+  // Added State for Button Interactivity
+  const [weekOffset, setWeekOffset] = useState(0);
+
+  // Date Calculation
+  const getWeekDates = (offset: number) => {
+    const start = new Date(2024, 6, 14); // Baseline July 14, 2024
+    start.setDate(start.getDate() + (offset * 7));
+    const end = new Date(start);
+    end.setDate(end.getDate() + 6);
+    return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} — ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+  };
 
   useEffect(() => {
     fetchData();

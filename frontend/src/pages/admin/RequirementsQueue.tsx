@@ -10,6 +10,8 @@ export function RequirementsQueue() {
   const [loading, setLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isMatching, setIsMatching] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 3;
 
   const fetchReqs = () => {
     setLoading(true);
@@ -69,7 +71,10 @@ export function RequirementsQueue() {
             <span className="inline-flex items-center px-3 py-1.5 rounded-full text-[10px] font-bold bg-surface-container-low text-primary border border-border-subtle uppercase tracking-widest">
                Total Pending 12
             </span>
-            <button className="flex items-center gap-2 px-4 py-2 border border-border-subtle rounded text-sm font-bold text-primary hover:bg-surface-container-low transition-colors shadow-sm bg-white">
+            <button 
+              onClick={() => alert("Advanced filtering is under development.")}
+              className="flex items-center gap-2 px-4 py-2 border border-border-subtle rounded text-sm font-bold text-primary hover:bg-surface-container-low transition-colors shadow-sm bg-white"
+            >
                Filter
                <Sparkles size={14} className="text-text-muted" />
             </button>
@@ -104,7 +109,7 @@ export function RequirementsQueue() {
           <div className="p-12 text-center text-text-muted">No pending requirements found.</div>
         ) : (
           <div className="flex flex-col gap-3">
-            {requirements.map(req => (
+            {requirements.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map(req => (
               <div key={req.id} className={`bg-white border ${selectedIds.has(req.id) ? 'border-primary shadow-sm' : 'border-border-subtle'} rounded-lg p-5 flex items-center justify-between gap-6 transition-all`}>
                 
                 <div className="flex items-center gap-4 min-w-[250px]">
@@ -155,7 +160,15 @@ export function RequirementsQueue() {
                   >
                     Find Match
                   </Link>
-                  <a href="#" className="text-[10px] font-bold text-text-muted hover:text-primary underline">View Details</a>
+                  <button 
+                    onClick={(e) => {
+                       e.preventDefault();
+                       alert(`Viewing full details for ${req.user_name}'s request.`);
+                    }}
+                    className="text-[10px] font-bold text-text-muted hover:text-primary underline bg-transparent border-none p-0 cursor-pointer"
+                  >
+                     View Details
+                  </button>
                 </div>
                 
               </div>
@@ -165,13 +178,29 @@ export function RequirementsQueue() {
       </div>
 
       <div className="mt-6 flex items-center justify-between border-t border-border-subtle pt-6">
-         <span className="text-xs text-text-muted font-medium">Showing 3 of 12 requests</span>
+         <span className="text-xs text-text-muted font-medium">
+           Showing {Math.min(requirements.length, (currentPage - 1) * itemsPerPage + 1)} to {Math.min(requirements.length, currentPage * itemsPerPage)} of {requirements.length} requests
+         </span>
          <div className="flex items-center gap-1">
-            <button className="w-8 h-8 rounded border border-border-subtle flex items-center justify-center text-text-muted hover:bg-surface transition-colors">&lt;</button>
-            <button className="w-8 h-8 rounded bg-primary text-white font-bold flex items-center justify-center shadow-sm">1</button>
-            <button className="w-8 h-8 rounded border border-border-subtle flex items-center justify-center text-text-muted hover:bg-surface transition-colors font-medium">2</button>
-            <button className="w-8 h-8 rounded border border-border-subtle flex items-center justify-center text-text-muted hover:bg-surface transition-colors font-medium">3</button>
-            <button className="w-8 h-8 rounded border border-border-subtle flex items-center justify-center text-text-muted hover:bg-surface transition-colors">&gt;</button>
+            <button 
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="w-8 h-8 rounded border border-border-subtle flex items-center justify-center text-text-muted hover:bg-surface transition-colors disabled:opacity-50"
+            >&lt;</button>
+            <button className="w-8 h-8 rounded bg-primary text-white font-bold flex items-center justify-center shadow-sm">{currentPage}</button>
+            {currentPage * itemsPerPage < requirements.length && (
+               <button 
+                 onClick={() => setCurrentPage(p => p + 1)}
+                 className="w-8 h-8 rounded border border-border-subtle flex items-center justify-center text-text-muted hover:bg-surface transition-colors font-medium"
+               >
+                 {currentPage + 1}
+               </button>
+            )}
+            <button 
+              onClick={() => setCurrentPage(p => p + 1)}
+              disabled={currentPage * itemsPerPage >= requirements.length}
+              className="w-8 h-8 rounded border border-border-subtle flex items-center justify-center text-text-muted hover:bg-surface transition-colors disabled:opacity-50"
+            >&gt;</button>
          </div>
       </div>
     </DashboardLayout>

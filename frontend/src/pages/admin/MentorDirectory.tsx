@@ -8,6 +8,8 @@ export function MentorDirectory() {
   const [mentors, setMentors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('All Mentors');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
 
   useEffect(() => {
     apiClient.fetch('/mentors')
@@ -39,7 +41,11 @@ export function MentorDirectory() {
   });
 
   const featuredMentor = filteredMentors.length > 0 ? filteredMentors[0] : null;
-  const otherMentors = filteredMentors.length > 1 ? filteredMentors.slice(1) : [];
+  const allOtherMentors = filteredMentors.length > 1 ? filteredMentors.slice(1) : [];
+  
+  // Pagination logic for otherMentors
+  const totalPages = Math.ceil(allOtherMentors.length / itemsPerPage);
+  const otherMentors = allOtherMentors.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
     <DashboardLayout title="Mentor Directory" searchPlaceholder="Search mentors, tags, skills...">
@@ -57,14 +63,20 @@ export function MentorDirectory() {
                 {f}
               </button>
             ))}
-            <button className="px-4 py-1.5 bg-transparent border border-border-subtle text-primary text-[10px] font-bold rounded-full uppercase tracking-widest hover:bg-surface-container-low flex items-center gap-1">
+            <button 
+              onClick={() => alert("Showing additional quick filters...")}
+              className="px-4 py-1.5 bg-transparent border border-border-subtle text-primary text-[10px] font-bold rounded-full uppercase tracking-widest hover:bg-surface-container-low flex items-center gap-1"
+            >
               <span>+</span> More
             </button>
           </div>
         </div>
         <div className="flex items-center gap-6">
           <span className="text-xs font-bold text-text-muted uppercase tracking-wider">{filteredMentors.length} Mentors Total</span>
-          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-border-subtle text-primary text-xs font-bold rounded shadow-sm hover:bg-surface-container-low">
+          <button 
+            onClick={() => alert("Advanced Filters Modal is under development.")}
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-border-subtle text-primary text-xs font-bold rounded shadow-sm hover:bg-surface-container-low"
+          >
             <SlidersHorizontal size={14} />
             Advanced Filters
           </button>
@@ -108,7 +120,10 @@ export function MentorDirectory() {
                       {(featuredMentor.tags || ['General']).map((t: string) => (
                         <TagPill key={t} label={t} color="gray" />
                       ))}
-                      <button className="text-xs text-text-muted border border-dashed border-outline-variant px-3 py-1 rounded hover:bg-surface-container-low transition-colors ml-auto">
+                      <button 
+                        onClick={() => alert("Edit tags modal opening...")}
+                        className="text-xs text-text-muted border border-dashed border-outline-variant px-3 py-1 rounded hover:bg-surface-container-low transition-colors ml-auto"
+                      >
                         + Edit Tags
                       </button>
                     </div>
@@ -172,24 +187,41 @@ export function MentorDirectory() {
                   </p>
                 </div>
                 
-                <button className="w-full py-2 border border-border-subtle rounded text-sm font-medium text-primary hover:bg-surface transition-colors">
+                <button 
+                  onClick={() => alert(`Opening Quick Edit for ${m.name}`)}
+                  className="w-full py-2 border border-border-subtle rounded text-sm font-medium text-primary hover:bg-surface transition-colors"
+                >
                   Quick Edit
                 </button>
               </div>
             ))}
           </div>
 
-          {/* Pagination */}
           <div className="flex items-center justify-between mt-4">
-            <span className="text-sm text-text-muted">Showing 1-{mentors.length} of {mentors.length} mentors</span>
+            <span className="text-sm text-text-muted">
+              Showing {Math.min(filteredMentors.length, featuredMentor ? 1 + (currentPage - 1) * itemsPerPage : 0)} - {Math.min(filteredMentors.length, featuredMentor ? 1 + currentPage * itemsPerPage : 0)} of {filteredMentors.length} mentors
+            </span>
             <div className="flex items-center gap-1">
-              <button className="w-8 h-8 flex items-center justify-center border border-border-subtle rounded text-text-muted hover:bg-surface"><ChevronLeft size={14} /></button>
-              <button className="w-8 h-8 flex items-center justify-center bg-primary text-white rounded font-medium text-sm">1</button>
-              <button className="w-8 h-8 flex items-center justify-center border border-transparent text-primary hover:bg-surface rounded font-medium text-sm">2</button>
-              <button className="w-8 h-8 flex items-center justify-center border border-transparent text-primary hover:bg-surface rounded font-medium text-sm">3</button>
-              <span className="text-text-muted mx-1">...</span>
-              <button className="w-8 h-8 flex items-center justify-center border border-transparent text-primary hover:bg-surface rounded font-medium text-sm">11</button>
-              <button className="w-8 h-8 flex items-center justify-center border border-border-subtle rounded text-text-muted hover:bg-surface"><ChevronRight size={14} /></button>
+              <button 
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="w-8 h-8 flex items-center justify-center border border-border-subtle rounded text-text-muted hover:bg-surface disabled:opacity-50"
+              ><ChevronLeft size={14} /></button>
+              
+              <button className="w-8 h-8 flex items-center justify-center bg-primary text-white rounded font-medium text-sm">{currentPage}</button>
+              
+              {currentPage < totalPages && (
+                <button 
+                  onClick={() => setCurrentPage(p => p + 1)}
+                  className="w-8 h-8 flex items-center justify-center border border-transparent text-primary hover:bg-surface rounded font-medium text-sm"
+                >{currentPage + 1}</button>
+              )}
+              
+              <button 
+                onClick={() => setCurrentPage(p => p + 1)}
+                disabled={currentPage >= totalPages}
+                className="w-8 h-8 flex items-center justify-center border border-border-subtle rounded text-text-muted hover:bg-surface disabled:opacity-50"
+              ><ChevronRight size={14} /></button>
             </div>
           </div>
 
