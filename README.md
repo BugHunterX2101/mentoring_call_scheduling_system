@@ -57,7 +57,7 @@ graph TD
     end
     
     subgraph External ["External Services"]
-        Groq[Groq API (LLaMA)]
+        Groq["Groq API (LLaMA)"]
     end
 
     Browser -->|REST API| Auth
