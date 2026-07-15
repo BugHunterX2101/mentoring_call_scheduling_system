@@ -11,15 +11,23 @@ export function MenteeDashboard() {
   const [isSaving, setIsSaving] = useState(false);
   const [callType, setCallType] = useState('Resume Revamp');
   const [description, setDescription] = useState('');
-  const [tags, setTags] = useState('');
+  
+  // Dynamic Tags state
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState('');
+  
+  // AI Summary State
+  const [aiSummary, setAiSummary] = useState<any>(null);
 
   const fetchData = useCallback(async () => {
     try {
-      const [reqsData, availData] = await Promise.all([
+      const [reqsData, availData, aiData] = await Promise.all([
         apiClient.fetch('/requirements/me'),
-        apiClient.fetch('/availability/me')
+        apiClient.fetch('/availability/me'),
+        apiClient.fetch('/recommendations/summary')
       ]);
       setRequirements(reqsData.requirements || []);
+      setAiSummary(aiData);
       
       if (availData.slots) {
         setSlots(availData.slots.map((s: any) => ({
@@ -45,6 +53,7 @@ export function MenteeDashboard() {
         method: 'PUT',
         body: JSON.stringify({ slots: slots.map(s => ({ ...s, timezone: 'UTC', is_recurring: true })) })
       });
+      fetchData();
     } catch (error) {
       console.error(error);
     } finally {
@@ -52,16 +61,29 @@ export function MenteeDashboard() {
     }
   };
 
+  const handleAddTag = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && tagInput.trim()) {
+      e.preventDefault();
+      if (!tags.includes(tagInput.trim())) {
+        setTags([...tags, tagInput.trim()]);
+      }
+      setTagInput('');
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setTags(tags.filter(t => t !== tagToRemove));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const tagArray = tags.split(',').map(t => t.trim()).filter(Boolean);
     try {
       await apiClient.fetch('/requirements', {
         method: 'POST',
-        body: JSON.stringify({ callType, description, tags: tagArray })
+        body: JSON.stringify({ callType, description, tags })
       });
       setDescription('');
-      setTags('');
+      setTags([]);
       fetchData(); // Auto-refresh UI
     } catch (e) {
       console.error(e);
@@ -81,13 +103,6 @@ export function MenteeDashboard() {
               <div>
                 <h3 className="text-lg font-bold text-primary">My Availability</h3>
                 <p className="text-sm text-text-muted mt-1">Select slots to indicate when you are free for mentoring sessions.</p>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <button className="p-1 border border-border-subtle rounded hover:bg-surface-container-low"><ChevronLeft size={16} /></button>
-                  <span className="text-sm font-semibold text-primary px-2">July 14 — 20, 2024</span>
-                  <button className="p-1 border border-border-subtle rounded hover:bg-surface-container-low"><ChevronRight size={16} /></button>
-                </div>
               </div>
             </div>
             
@@ -114,7 +129,6 @@ export function MenteeDashboard() {
           <div className="bg-surface-container-lowest border border-border-subtle rounded-lg shadow-sm">
             <div className="p-6 border-b border-border-subtle flex items-center justify-between">
               <h3 className="text-lg font-bold text-primary">My Requests</h3>
-              <button className="text-sm text-blue-600 font-medium hover:underline">View All History</button>
             </div>
             
             <div className="overflow-x-auto">
@@ -124,14 +138,12 @@ export function MenteeDashboard() {
                     <th className="px-6 py-4 font-medium">Type</th>
                     <th className="px-6 py-4 font-medium">Requested Date</th>
                     <th className="px-6 py-4 font-medium">Status</th>
-                    <th className="px-6 py-4 font-medium">Mentor</th>
-                    <th className="px-6 py-4 font-medium text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {requirements.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="px-6 py-4 text-center text-text-muted">No requests found.</td>
+                      <td colSpan={3} className="px-6 py-4 text-center text-text-muted">No requests found.</td>
                     </tr>
                   ) : (
                     requirements.map(req => (
@@ -144,15 +156,9 @@ export function MenteeDashboard() {
                             <span className="font-semibold text-primary">{req.call_type.replace(/_/g, ' ')}</span>
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-text-muted">{new Date(req.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</td>
+                        <td className="px-6 py-4 text-text-muted">{new Date(req.created_at).toLocaleDateString()}</td>
                         <td className="px-6 py-4">
                           <TagPill label={req.status} color={req.status === 'pending' ? 'amber' : 'green'} />
-                        </td>
-                        <td className="px-6 py-4 text-text-muted italic">Matching in progress...</td>
-                        <td className="px-6 py-4 text-right">
-                           <button className="w-8 h-8 rounded bg-primary text-white flex items-center justify-center hover:bg-primary/90 ml-auto">
-                             <Plus size={16} />
-                           </button>
                         </td>
                       </tr>
                     ))
@@ -197,13 +203,21 @@ export function MenteeDashboard() {
               
               <div>
                 <label className="block text-xs font-bold text-text-muted mb-2">Preferred Skills (Tags)</label>
-                <div className="flex gap-2 mb-2">
-                  <TagPill label="Python x" color="gray" className="cursor-pointer hover:bg-surface-container-high" />
-                  <TagPill label="FinTech x" color="gray" className="cursor-pointer hover:bg-surface-container-high" />
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {tags.map(t => (
+                     <div key={t} onClick={() => removeTag(t)}>
+                        <TagPill label={`${t} ✕`} color="gray" className="cursor-pointer hover:bg-surface-container-high" />
+                     </div>
+                  ))}
                 </div>
-                <button type="button" className="text-xs text-text-muted border border-dashed border-outline-variant px-3 py-1 rounded hover:bg-surface-container-low transition-colors">
-                  + Add Tag
-                </button>
+                <input 
+                  type="text"
+                  value={tagInput}
+                  onChange={e => setTagInput(e.target.value)}
+                  onKeyDown={handleAddTag}
+                  placeholder="Type a tag and press Enter..."
+                  className="w-full border border-border-subtle rounded-md p-2 text-sm text-primary outline-none"
+                />
               </div>
               
               <button type="submit" className="w-full bg-primary text-white py-3 rounded-md text-sm font-bold hover:bg-primary/90 transition-colors mt-2">
@@ -213,15 +227,24 @@ export function MenteeDashboard() {
           </div>
 
           {/* AI Match Helper */}
-          <div className="bg-primary text-white rounded-lg p-6 shadow-sm">
-            <h3 className="text-lg font-bold mb-2">AI Match Helper</h3>
-            <p className="text-sm text-text-muted mb-6 leading-relaxed">
-              Based on your recent availability, we found 3 mentors in your timezone specializing in React Architecture.
-            </p>
-            <button className="bg-white text-primary text-sm font-bold px-4 py-2 rounded shadow hover:bg-surface transition-colors">
-              View Matches
-            </button>
-          </div>
+          {aiSummary && (
+            <div className="bg-primary text-white rounded-lg p-6 shadow-sm">
+              <h3 className="text-lg font-bold mb-2">AI Match Helper</h3>
+              <p className="text-sm text-blue-100 mb-6 leading-relaxed">
+                {aiSummary.summary}
+              </p>
+              <div className="flex items-center justify-between mt-4 border-t border-white/20 pt-4">
+                 <div>
+                    <span className="block text-xs font-bold text-blue-200 uppercase tracking-wider">Matches</span>
+                    <span className="text-xl font-bold">{aiSummary.matchCount}</span>
+                 </div>
+                 <div>
+                    <span className="block text-xs font-bold text-blue-200 uppercase tracking-wider">Network</span>
+                    <span className="text-xl font-bold">{aiSummary.totalMentors} Mentors</span>
+                 </div>
+              </div>
+            </div>
+          )}
 
         </div>
       </div>

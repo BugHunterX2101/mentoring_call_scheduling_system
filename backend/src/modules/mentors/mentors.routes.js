@@ -8,7 +8,7 @@ const router = express.Router();
 router.get('/', requireAuth, rbac(['admin']), async (req, res) => {
   try {
     const result = await db.query(
-      `SELECT u.id, u.name, u.email, p.tags, p.description, p.is_active, p.rating_avg, p.rating_count 
+      `SELECT u.id, u.name, u.email, p.tags, p.description, p.is_active, p.rating_avg, p.rating_count, p.quote, p.ai_rationale, p.network_health 
        FROM users u 
        JOIN mentor_profiles p ON u.id = p.user_id 
        WHERE u.role = 'mentor' ORDER BY u.name`

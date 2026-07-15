@@ -8,13 +8,53 @@ import { Sparkles, ArrowRight } from 'lucide-react';
 export function RequirementsQueue() {
   const [requirements, setRequirements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isMatching, setIsMatching] = useState(false);
 
-  useEffect(() => {
+  const fetchReqs = () => {
+    setLoading(true);
     apiClient.fetch('/requirements?status=pending')
       .then(data => setRequirements(data.requirements))
       .catch(console.error)
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchReqs();
   }, []);
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === requirements.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(requirements.map(r => r.id)));
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    const next = new Set(selectedIds);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setSelectedIds(next);
+  };
+
+  const handleBatchMatch = async () => {
+    if (selectedIds.size === 0) return alert('Select at least one requirement');
+    setIsMatching(true);
+    try {
+      await apiClient.fetch('/requirements/batch-match', {
+        method: 'POST',
+        body: JSON.stringify({ ids: Array.from(selectedIds) })
+      });
+      setSelectedIds(new Set());
+      fetchReqs();
+    } catch (e) {
+      console.error(e);
+      alert('Batch match failed');
+    } finally {
+      setIsMatching(false);
+    }
+  };
 
   return (
     <DashboardLayout title="Pending Requirements" searchPlaceholder="Search mentees, tags, dates...">
@@ -30,8 +70,12 @@ export function RequirementsQueue() {
             <p className="text-xs text-white/80">Batch process pending requirements for optimal calendar placement.</p>
           </div>
         </div>
-        <button className="bg-white text-primary px-4 py-2 rounded text-sm font-bold shadow hover:bg-surface transition-colors">
-          Run Batch Match
+        <button 
+          onClick={handleBatchMatch}
+          disabled={isMatching || selectedIds.size === 0}
+          className="bg-white text-primary px-4 py-2 rounded text-sm font-bold shadow hover:bg-surface transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isMatching ? 'Processing...' : 'Run Batch Match'}
         </button>
       </div>
       
@@ -39,7 +83,12 @@ export function RequirementsQueue() {
         {/* Table Header */}
         <div className="grid grid-cols-[auto_2fr_1.5fr_1fr_1fr_auto] gap-4 p-4 border-b border-border-subtle bg-surface text-xs font-bold text-text-muted uppercase tracking-wider items-center">
            <div className="pl-2">
-             <input type="checkbox" className="w-4 h-4 rounded border-border-subtle text-primary focus:ring-primary" />
+             <input 
+               type="checkbox" 
+               checked={requirements.length > 0 && selectedIds.size === requirements.length}
+               onChange={toggleSelectAll}
+               className="w-4 h-4 rounded border-border-subtle text-primary focus:ring-primary cursor-pointer" 
+             />
            </div>
            <div>Mentee</div>
            <div>Type</div>
@@ -56,10 +105,15 @@ export function RequirementsQueue() {
         ) : (
           <div className="divide-y divide-border-subtle">
             {requirements.map(req => (
-              <div key={req.id} className="grid grid-cols-[auto_2fr_1.5fr_1fr_1fr_auto] gap-4 p-4 items-center hover:bg-surface-container-low transition-colors">
+              <div key={req.id} className={`grid grid-cols-[auto_2fr_1.5fr_1fr_1fr_auto] gap-4 p-4 items-center transition-colors ${selectedIds.has(req.id) ? 'bg-blue-50/50' : 'hover:bg-surface-container-low'}`}>
                 
                 <div className="pl-2">
-                  <input type="checkbox" className="w-4 h-4 rounded border-border-subtle text-primary focus:ring-primary" />
+                  <input 
+                    type="checkbox" 
+                    checked={selectedIds.has(req.id)}
+                    onChange={() => toggleSelect(req.id)}
+                    className="w-4 h-4 rounded border-border-subtle text-primary focus:ring-primary cursor-pointer" 
+                  />
                 </div>
                 
                 <div className="flex items-center gap-3">
@@ -79,7 +133,7 @@ export function RequirementsQueue() {
                 </div>
                 
                 <div>
-                  <TagPill label="PENDING" color="amber" />
+                  <TagPill label={req.status.toUpperCase()} color="amber" />
                 </div>
                 
                 <div className="text-right pr-2">

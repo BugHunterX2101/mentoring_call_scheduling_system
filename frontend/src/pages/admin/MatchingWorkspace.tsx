@@ -57,9 +57,12 @@ export function MatchingWorkspace() {
 
   const confirmBooking = async (mentorId: string, day: number, hour: number) => {
     // Determine the next date that matches 'day_of_week' = day
-    // For simplicity in this demo, just book for tomorrow at 'hour'
     const today = new Date();
-    today.setDate(today.getDate() + 1);
+    const currentDay = today.getDay();
+    const daysUntil = (day - currentDay + 7) % 7;
+    const addDays = daysUntil === 0 ? 7 : daysUntil; // always in the future
+    today.setDate(today.getDate() + addDays);
+    
     const start = new Date(today);
     start.setHours(hour, 0, 0, 0);
     const end = new Date(today);

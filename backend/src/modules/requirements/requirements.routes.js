@@ -91,4 +91,23 @@ router.patch('/:id/status', requireAuth, rbac(['admin']), async (req, res) => {
   }
 });
 
+router.post('/batch-match', requireAuth, rbac(['admin']), async (req, res) => {
+  try {
+    const { ids } = req.body;
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: 'Missing requirements ids' });
+    }
+    
+    // Simulating batch matching - update all to "matched"
+    // In reality this might trigger an async job or multiple /recommendation calls
+    const query = `UPDATE requirements SET status = 'matched' WHERE id = ANY($1) RETURNING *`;
+    const result = await db.query(query, [ids]);
+    
+    res.json({ message: 'Batch match successful', updated: result.rows.length });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;
