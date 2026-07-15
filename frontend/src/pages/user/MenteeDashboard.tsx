@@ -104,6 +104,15 @@ export function MenteeDashboard() {
                 <h3 className="text-lg font-bold text-primary">My Availability</h3>
                 <p className="text-sm text-text-muted mt-1">Select slots to indicate when you are free for mentoring sessions.</p>
               </div>
+              <div className="flex items-center gap-4">
+                <button className="w-8 h-8 rounded border border-border-subtle flex items-center justify-center hover:bg-surface-container-low transition-colors">
+                   <ChevronLeft size={16} className="text-primary" />
+                </button>
+                <span className="text-sm font-bold text-primary">July 14 — 20, 2024</span>
+                <button className="w-8 h-8 rounded border border-border-subtle flex items-center justify-center hover:bg-surface-container-low transition-colors">
+                   <ChevronRight size={16} className="text-primary" />
+                </button>
+              </div>
             </div>
             
             <TimeGrid 
@@ -114,61 +123,19 @@ export function MenteeDashboard() {
               endHour={15} 
             />
             
-            <div className="mt-6 flex justify-end">
+            <div className="mt-6 flex justify-end pt-4 border-t border-border-subtle">
               <button 
                 onClick={handleSaveAvailability} 
                 disabled={isSaving}
-                className="px-6 py-2 bg-primary text-white text-sm font-medium rounded hover:bg-primary/90 transition-colors disabled:opacity-50"
+                className="px-6 py-2.5 bg-primary text-white text-sm font-bold rounded hover:bg-primary/90 transition-colors disabled:opacity-50"
               >
                 {isSaving ? 'Saving...' : 'Save Schedule'}
               </button>
             </div>
           </div>
-
-          {/* My Requests */}
-          <div className="bg-surface-container-lowest border border-border-subtle rounded-lg shadow-sm">
-            <div className="p-6 border-b border-border-subtle flex items-center justify-between">
-              <h3 className="text-lg font-bold text-primary">My Requests</h3>
-            </div>
-            
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left">
-                <thead className="text-xs text-text-muted uppercase bg-surface border-b border-border-subtle">
-                  <tr>
-                    <th className="px-6 py-4 font-medium">Type</th>
-                    <th className="px-6 py-4 font-medium">Requested Date</th>
-                    <th className="px-6 py-4 font-medium">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {requirements.length === 0 ? (
-                    <tr>
-                      <td colSpan={3} className="px-6 py-4 text-center text-text-muted">No requests found.</td>
-                    </tr>
-                  ) : (
-                    requirements.map(req => (
-                      <tr key={req.id} className="border-b border-border-subtle last:border-0 hover:bg-surface-container-low">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded bg-blue-100 flex items-center justify-center text-blue-600">
-                              <FileText size={16} />
-                            </div>
-                            <span className="font-semibold text-primary">{req.call_type.replace(/_/g, ' ')}</span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-text-muted">{new Date(req.created_at).toLocaleDateString()}</td>
-                        <td className="px-6 py-4">
-                          <TagPill label={req.status} color={req.status === 'pending' ? 'amber' : 'green'} />
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-          
         </div>
+
+
 
         {/* Right Column */}
         <div className="flex-[1.2] flex flex-col gap-6">
@@ -202,25 +169,30 @@ export function MenteeDashboard() {
               </div>
               
               <div>
-                <label className="block text-xs font-bold text-text-muted mb-2">Preferred Skills (Tags)</label>
+                <label className="block text-xs font-bold text-primary mb-2">Preferred Skills (Tags)</label>
                 <div className="flex flex-wrap gap-2 mb-2">
                   {tags.map(t => (
                      <div key={t} onClick={() => removeTag(t)}>
-                        <TagPill label={`${t} ✕`} color="gray" className="cursor-pointer hover:bg-surface-container-high" />
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-surface-container-low text-primary cursor-pointer hover:bg-surface-container-high border border-border-subtle">
+                          {t} <span className="ml-1 text-text-muted">✕</span>
+                        </span>
                      </div>
                   ))}
                 </div>
-                <input 
-                  type="text"
-                  value={tagInput}
-                  onChange={e => setTagInput(e.target.value)}
-                  onKeyDown={handleAddTag}
-                  placeholder="Type a tag and press Enter..."
-                  className="w-full border border-border-subtle rounded-md p-2 text-sm text-primary outline-none"
-                />
+                <div className="flex items-center border border-border-subtle border-dashed rounded-full px-3 py-1.5 w-max hover:bg-surface-container-low transition-colors">
+                  <span className="text-text-muted text-xs mr-1">+</span>
+                  <input 
+                    type="text"
+                    value={tagInput}
+                    onChange={e => setTagInput(e.target.value)}
+                    onKeyDown={handleAddTag}
+                    placeholder="Add Tag"
+                    className="text-xs text-primary outline-none bg-transparent w-20"
+                  />
+                </div>
               </div>
               
-              <button type="submit" className="w-full bg-primary text-white py-3 rounded-md text-sm font-bold hover:bg-primary/90 transition-colors mt-2">
+              <button type="submit" className="w-full bg-primary text-white py-3 rounded text-sm font-bold hover:bg-primary/90 transition-colors mt-2 shadow-sm">
                 Post Request
               </button>
             </form>
@@ -228,24 +200,81 @@ export function MenteeDashboard() {
 
           {/* AI Match Helper */}
           {aiSummary && (
-            <div className="bg-primary text-white rounded-lg p-6 shadow-sm">
-              <h3 className="text-lg font-bold mb-2">AI Match Helper</h3>
-              <p className="text-sm text-blue-100 mb-6 leading-relaxed">
-                {aiSummary.summary}
-              </p>
-              <div className="flex items-center justify-between mt-4 border-t border-white/20 pt-4">
-                 <div>
-                    <span className="block text-xs font-bold text-blue-200 uppercase tracking-wider">Matches</span>
-                    <span className="text-xl font-bold">{aiSummary.matchCount}</span>
-                 </div>
-                 <div>
-                    <span className="block text-xs font-bold text-blue-200 uppercase tracking-wider">Network</span>
-                    <span className="text-xl font-bold">{aiSummary.totalMentors} Mentors</span>
-                 </div>
+            <div className="bg-primary text-white rounded-lg p-6 shadow-sm relative overflow-hidden">
+              <div className="relative z-10">
+                <h3 className="text-lg font-bold mb-3">AI Match Helper</h3>
+                <p className="text-xs text-white/90 mb-6 leading-relaxed max-w-[90%]">
+                  Based on your recent availability, we found {aiSummary.matchCount} mentors in your timezone specializing in your requested skills.
+                </p>
+                <button className="bg-white text-primary text-xs font-bold px-4 py-2.5 rounded shadow hover:bg-surface transition-colors">
+                  View Matches
+                </button>
               </div>
             </div>
           )}
 
+        </div>
+      </div>
+
+      {/* My Requests (Full Width Bottom) */}
+      <div className="mt-8 bg-surface-container-lowest border border-border-subtle rounded-lg shadow-sm w-full">
+        <div className="p-6 border-b border-border-subtle flex items-center justify-between">
+          <h3 className="text-lg font-bold text-primary">My Requests</h3>
+          <a href="#" className="text-xs font-bold text-blue-500 hover:underline">View All History</a>
+        </div>
+        
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left">
+            <thead className="text-xs text-text-muted bg-surface border-b border-border-subtle">
+              <tr>
+                <th className="px-6 py-4 font-normal">Type</th>
+                <th className="px-6 py-4 font-normal">Requested Date</th>
+                <th className="px-6 py-4 font-normal">Status</th>
+                <th className="px-6 py-4 font-normal">Mentor</th>
+                <th className="px-6 py-4 font-normal text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {requirements.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-4 text-center text-text-muted">No requests found.</td>
+                </tr>
+              ) : (
+                requirements.map(req => (
+                  <tr key={req.id} className="border-b border-border-subtle last:border-0 hover:bg-surface-container-low">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded bg-blue-100 flex items-center justify-center text-blue-600">
+                          <FileText size={16} />
+                        </div>
+                        <span className="font-bold text-primary text-xs">{req.call_type.replace(/_/g, ' ')}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-text-muted text-xs">
+                      {new Date(req.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                    </td>
+                    <td className="px-6 py-4">
+                      {req.status === 'pending' ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-600 border border-amber-200">
+                          Pending
+                        </span>
+                      ) : (
+                        <TagPill label={req.status} color="green" />
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-text-muted text-xs">
+                       {req.status === 'pending' ? 'Matching in progress...' : 'Matched'}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                       <button className="w-10 h-10 rounded bg-primary text-white flex items-center justify-center ml-auto hover:bg-primary/90 transition-colors shadow">
+                          <Plus size={20} />
+                       </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </DashboardLayout>

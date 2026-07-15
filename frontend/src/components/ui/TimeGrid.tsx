@@ -56,7 +56,8 @@ export function TimeGrid({ slots, editable = false, onSlotsChange, startHour = 9
         <div className="p-3 text-center text-xs font-medium text-text-muted border-r border-border-subtle"></div>
         {DISPLAY_DAYS.map(day => (
           <div key={day} className="p-3 text-center border-r border-border-subtle last:border-r-0">
-            <div className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{DAYS[day]}</div>
+            <div className="text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1">{DAYS[day]}</div>
+            {/* The mock shows specific dates like "14", "15" in some views, but we can leave this simple or pass it in. For now just day name is fine, we can add a date prop later if needed */}
           </div>
         ))}
       </div>
@@ -66,14 +67,14 @@ export function TimeGrid({ slots, editable = false, onSlotsChange, startHour = 9
         {hours.map(hour => (
           <div key={hour} className="grid grid-cols-[80px_1fr_1fr_1fr_1fr_1fr_1fr_1fr] border-b border-border-subtle last:border-b-0 min-h-[60px]">
             {/* Time Label */}
-            <div className="p-2 border-r border-border-subtle flex items-center justify-center bg-white">
-              <span className="text-xs font-mono text-text-muted">{hour.toString().padStart(2, '0')}:00</span>
+            <div className="p-2 border-r border-border-subtle flex items-start justify-center bg-white pt-3">
+              <span className="text-[10px] font-bold text-text-muted">{hour.toString().padStart(2, '0')}:00</span>
             </div>
             
             {/* Day Cells */}
             {DISPLAY_DAYS.map(day => {
               const slot = getSlot(day, hour);
-              let cellClass = "border-r border-border-subtle last:border-r-0 p-1 bg-white relative transition-colors";
+              let cellClass = "border-r border-border-subtle last:border-r-0 p-1 bg-white relative transition-colors bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:12px_12px]";
               let content = null;
               
               if (editable) {
@@ -81,15 +82,35 @@ export function TimeGrid({ slots, editable = false, onSlotsChange, startHour = 9
               }
 
               if (slot) {
-                if (slot.type === 'mentor') {
-                  content = <div className="absolute inset-1 bg-primary text-white flex items-center justify-center text-[10px] font-bold rounded shadow-sm">MENTOR</div>;
-                } else if (slot.type === 'user') {
-                  content = <div className="absolute inset-1 bg-blue-100 text-blue-800 flex items-center justify-center text-[10px] font-bold rounded border border-blue-200">USER</div>;
+                if (slot.type === 'mentor' || (editable && window.location.pathname.includes('mentor'))) {
+                   // Mentor "AVAILABLE" block
+                   content = (
+                     <div className="absolute inset-0 bg-primary text-white p-2 rounded shadow-sm z-10 flex flex-col justify-start items-start">
+                       <span className="text-[9px] font-bold tracking-widest uppercase">Available</span>
+                       <span className="text-[10px] font-bold">{hour.toString().padStart(2, '0')}:00 — {hour + 1}:00</span>
+                     </div>
+                   );
+                } else if (slot.type === 'user' || (editable && window.location.pathname.includes('user'))) {
+                   // Mentee block (Black box with checkmark)
+                   content = (
+                     <div className="absolute inset-1 bg-primary text-white flex items-center justify-center rounded shadow-sm z-10">
+                       <span className="text-sm font-bold">✓</span>
+                     </div>
+                   );
                 } else if (slot.type === 'overlap') {
-                  content = <div className="absolute inset-1 bg-blue-50 text-blue-600 flex items-center justify-center text-[10px] font-bold rounded border-2 border-dashed border-blue-300 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPgogIDxwYXRoIGQ9Ik0tMiAxMEwxMCAyWk0xMCAxNEwyIC0yWiIgc3Ryb2tlPSIjYmZjYmZkIiBzdHJva2Utd2lkdGg9IjIiLz4KPC9zdmc+')]">MUTUAL</div>;
+                   // Mutual Overlap block
+                   content = (
+                     <div className="absolute inset-1 bg-blue-50 text-blue-600 flex flex-col justify-center items-center rounded border-2 border-dashed border-blue-300 z-10 p-1">
+                       <span className="text-[9px] font-bold tracking-widest uppercase leading-tight text-center">Mutual<br/>Window</span>
+                     </div>
+                   );
                 } else {
-                  // Default available (black box like in screenshot)
-                  content = <div className="absolute inset-1 bg-primary text-white flex items-center justify-center text-[10px] font-bold rounded shadow-sm"><span className="opacity-0 group-hover:opacity-100">✓</span></div>;
+                   // Admin Matching Workspace 'SELECT' block
+                   content = (
+                     <div className="absolute inset-1 bg-white border-2 border-primary text-primary flex items-center justify-center rounded shadow-sm hover:bg-primary hover:text-white transition-colors z-10">
+                       <span className="text-[10px] font-bold tracking-widest">SELECT</span>
+                     </div>
+                   );
                 }
               }
 
@@ -99,7 +120,7 @@ export function TimeGrid({ slots, editable = false, onSlotsChange, startHour = 9
                   className={cellClass}
                   onClick={() => toggleSlot(day, hour)}
                 >
-                  <div className="w-full h-full border border-transparent hover:border-outline-variant border-dashed rounded group relative">
+                  <div className="w-full h-full border border-transparent rounded group relative">
                      {content}
                   </div>
                 </div>

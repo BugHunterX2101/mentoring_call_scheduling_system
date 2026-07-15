@@ -82,12 +82,10 @@ export function SideNav() {
       </nav>
 
       <div className="p-6 mt-auto">
-        {user.role === 'admin' && (
-          <button className="w-full flex items-center justify-center gap-2 bg-primary text-white py-3 px-4 rounded hover:bg-primary/90 transition-colors text-sm font-medium mb-6">
-            <Plus size={16} />
-            New Match Session
-          </button>
-        )}
+        <button className="w-full flex items-center justify-center gap-2 bg-primary text-white py-3 px-4 rounded hover:bg-primary/90 transition-colors text-sm font-medium mb-6 shadow-sm">
+          <Plus size={16} />
+          New Match Session
+        </button>
         <div className="flex items-center gap-3">
           <img src={`https://ui-avatars.com/api/?name=${user.name}&background=random`} alt="Avatar" className="w-10 h-10 rounded-full" />
           <div className="flex-1 overflow-hidden">

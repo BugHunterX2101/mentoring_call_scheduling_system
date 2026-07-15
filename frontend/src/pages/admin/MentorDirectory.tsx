@@ -44,7 +44,7 @@ export function MentorDirectory() {
   return (
     <DashboardLayout title="Mentor Directory" searchPlaceholder="Search mentors, tags, skills...">
       {/* Quick Filters */}
-      <div className="flex items-center justify-between mb-8 pb-4 border-b border-border-subtle">
+      <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
           <span className="text-xs font-bold text-text-muted uppercase tracking-wider">Quick Filters:</span>
           <div className="flex gap-2">
@@ -52,19 +52,19 @@ export function MentorDirectory() {
               <button 
                 key={f}
                 onClick={() => setFilter(f)}
-                className={`px-4 py-1.5 text-sm font-medium rounded-full transition-colors ${filter === f ? 'bg-primary text-white' : 'bg-white border border-border-subtle text-text-muted hover:bg-surface'}`}
+                className={`px-4 py-1.5 text-[10px] font-bold rounded-full uppercase tracking-widest transition-colors ${filter === f ? 'bg-primary text-white' : 'bg-transparent border border-border-subtle text-primary hover:bg-surface-container-low'}`}
               >
                 {f}
               </button>
             ))}
-            <button className="px-4 py-1.5 bg-white border border-border-subtle text-text-muted text-sm font-medium rounded-full hover:bg-surface flex items-center gap-1">
+            <button className="px-4 py-1.5 bg-transparent border border-border-subtle text-primary text-[10px] font-bold rounded-full uppercase tracking-widest hover:bg-surface-container-low flex items-center gap-1">
               <span>+</span> More
             </button>
           </div>
         </div>
         <div className="flex items-center gap-6">
-          <span className="text-sm text-text-muted">{filteredMentors.length} Mentors Total</span>
-          <button className="flex items-center gap-2 px-4 py-1.5 bg-white border border-border-subtle text-primary text-sm font-medium rounded hover:bg-surface">
+          <span className="text-xs font-bold text-text-muted uppercase tracking-wider">{filteredMentors.length} Mentors Total</span>
+          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-border-subtle text-primary text-xs font-bold rounded shadow-sm hover:bg-surface-container-low">
             <SlidersHorizontal size={14} />
             Advanced Filters
           </button>

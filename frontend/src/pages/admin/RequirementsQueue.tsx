@@ -59,97 +59,120 @@ export function RequirementsQueue() {
   return (
     <DashboardLayout title="Pending Requirements" searchPlaceholder="Search mentees, tags, dates...">
       
+      {/* Header Info */}
+      <div className="flex items-center justify-between mb-6">
+         <div>
+            <h2 className="text-xl font-bold text-primary">Pending Requirements</h2>
+            <p className="text-sm text-text-muted mt-1">Review and match incoming mentee requests with suitable mentors.</p>
+         </div>
+         <div className="flex items-center gap-3">
+            <span className="inline-flex items-center px-3 py-1.5 rounded-full text-[10px] font-bold bg-surface-container-low text-primary border border-border-subtle uppercase tracking-widest">
+               Total Pending 12
+            </span>
+            <button className="flex items-center gap-2 px-4 py-2 border border-border-subtle rounded text-sm font-bold text-primary hover:bg-surface-container-low transition-colors shadow-sm bg-white">
+               Filter
+               <Sparkles size={14} className="text-text-muted" />
+            </button>
+         </div>
+      </div>
+
       {/* AI Banner */}
-      <div className="bg-primary text-white rounded-lg p-4 mb-6 flex items-center justify-between shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="bg-white/20 p-2 rounded-full">
+      <div className="bg-primary text-white rounded-lg p-5 mb-6 flex items-center justify-between shadow-sm relative overflow-hidden">
+        <div className="flex items-center gap-4 relative z-10">
+          <div className="bg-white/10 p-2.5 rounded shadow-sm border border-white/20">
             <Sparkles size={20} className="text-white" />
           </div>
           <div>
-            <h3 className="font-bold text-sm">AI-Powered Matching Available</h3>
-            <p className="text-xs text-white/80">Batch process pending requirements for optimal calendar placement.</p>
+            <h3 className="font-bold text-base">AI-Powered Matching Available</h3>
+            <p className="text-xs text-white/80 mt-0.5">Batch process pending requirements for optimal calendar placement.</p>
           </div>
         </div>
         <button 
           onClick={handleBatchMatch}
           disabled={isMatching || selectedIds.size === 0}
-          className="bg-white text-primary px-4 py-2 rounded text-sm font-bold shadow hover:bg-surface transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="bg-white text-primary px-5 py-2.5 rounded text-sm font-bold shadow hover:bg-surface transition-colors disabled:opacity-50 disabled:cursor-not-allowed relative z-10"
         >
           {isMatching ? 'Processing...' : 'Run Batch Match'}
         </button>
       </div>
       
-      <div className="bg-white border border-border-subtle rounded-lg shadow-sm overflow-hidden">
-        {/* Table Header */}
-        <div className="grid grid-cols-[auto_2fr_1.5fr_1fr_1fr_auto] gap-4 p-4 border-b border-border-subtle bg-surface text-xs font-bold text-text-muted uppercase tracking-wider items-center">
-           <div className="pl-2">
-             <input 
-               type="checkbox" 
-               checked={requirements.length > 0 && selectedIds.size === requirements.length}
-               onChange={toggleSelectAll}
-               className="w-4 h-4 rounded border-border-subtle text-primary focus:ring-primary cursor-pointer" 
-             />
-           </div>
-           <div>Mentee</div>
-           <div>Type</div>
-           <div>Submitted</div>
-           <div>Status</div>
-           <div className="text-right pr-2">Action</div>
-        </div>
-
+      <div className="bg-transparent">
         {/* List Items */}
         {loading ? (
           <div className="p-8 text-center text-text-muted">Loading requirements...</div>
         ) : requirements.length === 0 ? (
           <div className="p-12 text-center text-text-muted">No pending requirements found.</div>
         ) : (
-          <div className="divide-y divide-border-subtle">
+          <div className="flex flex-col gap-3">
             {requirements.map(req => (
-              <div key={req.id} className={`grid grid-cols-[auto_2fr_1.5fr_1fr_1fr_auto] gap-4 p-4 items-center transition-colors ${selectedIds.has(req.id) ? 'bg-blue-50/50' : 'hover:bg-surface-container-low'}`}>
+              <div key={req.id} className={`bg-white border ${selectedIds.has(req.id) ? 'border-primary shadow-sm' : 'border-border-subtle'} rounded-lg p-5 flex items-center justify-between gap-6 transition-all`}>
                 
-                <div className="pl-2">
+                <div className="flex items-center gap-4 min-w-[250px]">
                   <input 
                     type="checkbox" 
                     checked={selectedIds.has(req.id)}
                     onChange={() => toggleSelect(req.id)}
                     className="w-4 h-4 rounded border-border-subtle text-primary focus:ring-primary cursor-pointer" 
                   />
-                </div>
-                
-                <div className="flex items-center gap-3">
-                  <img src={`https://ui-avatars.com/api/?name=${req.user_name}&background=random`} alt={req.user_name} className="w-10 h-10 rounded-full" />
-                  <div>
-                    <h4 className="text-sm font-bold text-primary">{req.user_name}</h4>
-                    <p className="text-xs text-text-muted">{req.user_name.toLowerCase().replace(' ', '.')}@example.com</p>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-surface-container-high rounded text-primary flex items-center justify-center font-bold text-sm border border-border-subtle">
+                       {req.user_name.split(' ').map((n:string) => n[0]).join('')}
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-primary">{req.user_name}</h4>
+                      <p className="text-[10px] font-mono text-text-muted uppercase tracking-widest mt-0.5">Software Engineer</p>
+                    </div>
                   </div>
                 </div>
                 
-                <div>
-                  <TagPill label={req.call_type.replace(/_/g, ' ').toUpperCase()} color="blue" />
+                <div className="flex-1">
+                  <div className="flex gap-2 mb-2">
+                     <span className="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold bg-surface-container-low text-primary border border-border-subtle uppercase tracking-widest">
+                       Resume Revamp
+                     </span>
+                     <span className="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold bg-surface-container-low text-primary border border-border-subtle uppercase tracking-widest">
+                       Tech
+                     </span>
+                  </div>
+                  <p className="text-xs text-text-muted line-clamp-1 italic">"Seeking a senior mentor to review my resume for a career pivot into..."</p>
                 </div>
                 
-                <div className="text-sm text-text-muted">
-                  {new Date(req.created_at || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                <div className="min-w-[150px]">
+                  <div className="text-xs mb-1">
+                    <span className="text-text-muted mr-2">Urgency:</span>
+                    <span className="font-bold text-primary">Medium</span>
+                  </div>
+                  <div className="text-xs">
+                    <span className="text-text-muted mr-2">Language:</span>
+                    <span className="font-bold text-primary">English, Portuguese</span>
+                  </div>
                 </div>
                 
-                <div>
-                  <TagPill label={req.status.toUpperCase()} color="amber" />
-                </div>
-                
-                <div className="text-right pr-2">
+                <div className="text-right flex flex-col items-end gap-2 min-w-[120px]">
                   <Link 
                     to={`/admin/requirements/${req.id}/match`}
-                    className="inline-flex items-center gap-2 bg-primary text-white px-4 py-2 rounded text-sm font-medium hover:bg-primary/90 transition-colors"
+                    className="w-full text-center bg-primary text-white px-4 py-2 rounded text-xs font-bold shadow-sm hover:bg-primary/90 transition-colors"
                   >
                     Find Match
-                    <ArrowRight size={16} />
                   </Link>
+                  <a href="#" className="text-[10px] font-bold text-text-muted hover:text-primary underline">View Details</a>
                 </div>
                 
               </div>
             ))}
           </div>
         )}
+      </div>
+
+      <div className="mt-6 flex items-center justify-between border-t border-border-subtle pt-6">
+         <span className="text-xs text-text-muted font-medium">Showing 3 of 12 requests</span>
+         <div className="flex items-center gap-1">
+            <button className="w-8 h-8 rounded border border-border-subtle flex items-center justify-center text-text-muted hover:bg-surface transition-colors">&lt;</button>
+            <button className="w-8 h-8 rounded bg-primary text-white font-bold flex items-center justify-center shadow-sm">1</button>
+            <button className="w-8 h-8 rounded border border-border-subtle flex items-center justify-center text-text-muted hover:bg-surface transition-colors font-medium">2</button>
+            <button className="w-8 h-8 rounded border border-border-subtle flex items-center justify-center text-text-muted hover:bg-surface transition-colors font-medium">3</button>
+            <button className="w-8 h-8 rounded border border-border-subtle flex items-center justify-center text-text-muted hover:bg-surface transition-colors">&gt;</button>
+         </div>
       </div>
     </DashboardLayout>
   );

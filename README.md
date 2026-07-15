@@ -1,10 +1,15 @@
 <div align="center">
 
-<img src="https://img.shields.io/badge/Mentoring_Call_Scheduler-2B579A?style=for-the-badge&logo=react&logoColor=white" alt="Mentoring Call Scheduling System" />
+<img src="https://img.shields.io/badge/Mentoring%20Call%20Scheduler-2B579A?style=for-the-badge&logo=react&logoColor=white" alt="Mentoring Call Scheduling System" />
 
 <h1>Mentoring Call Scheduling System</h1>
 <p><strong>An intelligent, real-time matchmaking and scheduling platform for industry mentorship</strong></p>
 <p>Built with Node.js · React 18 · TypeScript · PostgreSQL · Tailwind CSS · Google Gemini AI</p>
+
+<br/>
+
+[![Frontend App](https://img.shields.io/badge/Frontend-React_18-61DAFB?style=for-the-badge)](#)
+[![Backend API](https://img.shields.io/badge/API_Docs-Express.js-000000?style=for-the-badge)](#)
 
 <br/>
 
@@ -194,8 +199,8 @@ sequenceDiagram
 | **Frontend Framework** | React 18 / Vite | Handles component rendering, routing, and fast local development. |
 | **Styling** | Tailwind CSS | Custom utility classes tailored to replicate enterprise SaaS design tokens. |
 | **Backend Framework** | Node.js + Express.js | High-performance RESTful API architecture. |
-| **Database** | PostgreSQL | Robust relational storage with the `pg` client wrapper. |
-| **Artificial Intelligence** | Google Generative AI SDK | Integrates `gemini-1.5-flash` for high-speed, JSON-structured output ranking. |
+| **Database** | PostgreSQL | Robust relational storage with the pg client wrapper. |
+| **Artificial Intelligence** | Google Generative AI SDK | Integrates gemini-1.5-flash for high-speed, JSON-structured output ranking. |
 | **Security** | bcrypt & JWT | Industry-standard password hashing and secure token-based session generation. |
 
 ---
@@ -259,33 +264,33 @@ Navigate to [http://localhost:5173](http://localhost:5173).
 
 ```text
 mentoring_call_scheduling_system/
-├── backend/
-│   ├── src/
-│   │   ├── config/          # DB connection and schema update scripts
-│   │   ├── middleware/      # JWT auth and RBAC guards
-│   │   ├── modules/         # API Route Controllers (mentors, bookings, etc.)
-│   │   └── server.js        # Express application entry point
-│   ├── fixPasswords.js      # Utility script for hash migration
-│   ├── .env                 # Backend environment variables
-│   └── package.json
-│
-└── frontend/
-    ├── src/
-    │   ├── components/
-    │   │   ├── layout/      # Shared dashboard layouts and sidebars
-    │   │   └── ui/          # Reusable UI primitives (TimeGrid, TagPill)
-    │   ├── lib/
-    │   │   └── api/         # Fetch wrapper with interceptors
-    │   ├── pages/
-    │   │   ├── admin/       # Requirements Queue & Matching Workspace
-    │   │   ├── auth/        # Login/Signup interfaces
-    │   │   ├── mentor/      # Mentor schedule & confirmed calls
-    │   │   └── user/        # Mentee dashboard & AI helper
-    │   ├── index.css        # Tailwind directives
-    │   └── main.tsx         # React root
-    ├── .env                 # Frontend environment variables
-    ├── tailwind.config.js   # Tailwind theme configuration
-    └── vite.config.ts
+|-- backend/
+|   |-- src/
+|   |   |-- config/          # DB connection and schema update scripts
+|   |   |-- middleware/      # JWT auth and RBAC guards
+|   |   |-- modules/         # API Route Controllers (mentors, bookings, etc.)
+|   |   `-- server.js        # Express application entry point
+|   |-- fixPasswords.js      # Utility script for hash migration
+|   |-- .env                 # Backend environment variables
+|   `-- package.json
+|
+`-- frontend/
+    |-- src/
+    |   |-- components/
+    |   |   |-- layout/      # Shared dashboard layouts and sidebars
+    |   |   `-- ui/          # Reusable UI primitives (TimeGrid, TagPill)
+    |   |-- lib/
+    |   |   `-- api/         # Fetch wrapper with interceptors
+    |   |-- pages/
+    |   |   |-- admin/       # Requirements Queue & Matching Workspace
+    |   |   |-- auth/        # Login/Signup interfaces
+    |   |   |-- mentor/      # Mentor schedule & confirmed calls
+    |   |   `-- user/        # Mentee dashboard & AI helper
+    |   |-- index.css        # Tailwind directives
+    |   `-- main.tsx         # React root
+    |-- .env                 # Frontend environment variables
+    |-- tailwind.config.js   # Tailwind theme configuration
+    `-- vite.config.ts
 ```
 
 ---
