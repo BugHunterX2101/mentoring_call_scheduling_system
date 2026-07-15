@@ -268,9 +268,15 @@ Navigate to [http://localhost:5173](http://localhost:5173).
 mentoring_call_scheduling_system/
 |-- backend/
 |   |-- src/
-|   |   |-- config/          # DB connection and schema update scripts
-|   |   |-- middleware/      # JWT auth and RBAC guards
-|   |   |-- modules/         # API Route Controllers (mentors, bookings, etc.)
+|   |   |-- config/          # DB connection (db.js), migrations, and seed scripts
+|   |   |-- middleware/      # JWT auth (auth.middleware.js) and RBAC guards
+|   |   |-- modules/         # API Route Controllers
+|   |   |   |-- auth/        # Login & Signup routes with bcrypt
+|   |   |   |-- bookings/    # Overlap calculation & Session booking logic
+|   |   |   |-- mentors/     # Mentor directory & active status toggling
+|   |   |   |-- recommendations/ # AI Matchmaking engine (groqService.js)
+|   |   |   |-- requirements/# Mentee requests & Batch Matching queue
+|   |   |   `-- settings/    # Dynamic Admin configurations & DB Backups
 |   |   `-- server.js        # Express application entry point
 |   |-- fixPasswords.js      # Utility script for hash migration
 |   |-- .env                 # Backend environment variables
@@ -278,16 +284,19 @@ mentoring_call_scheduling_system/
 |
 `-- frontend/
     |-- src/
+    |   |-- app/             # Application router (routes.tsx)
     |   |-- components/
     |   |   |-- layout/      # Shared dashboard layouts and sidebars
     |   |   `-- ui/          # Reusable UI primitives (TimeGrid, TagPill)
     |   |-- lib/
-    |   |   `-- api/         # Fetch wrapper with interceptors
+    |   |   |-- api/         # Fetch wrapper with interceptors
+    |   |   `-- auth/        # AuthContext provider & state hooks
     |   |-- pages/
-    |   |   |-- admin/       # Requirements Queue & Matching Workspace
-    |   |   |-- auth/        # Login/Signup interfaces
-    |   |   |-- mentor/      # Mentor schedule & confirmed calls
-    |   |   `-- user/        # Mentee dashboard & AI helper
+    |   |   |-- admin/       # RequirementsQueue, MatchingWorkspace, AdminSettings
+    |   |   |-- auth/        # Login.tsx & Signup.tsx interfaces
+    |   |   |-- mentor/      # MentorDashboard & confirmed calls
+    |   |   `-- user/        # MenteeDashboard & dynamic AI helper
+    |   |-- App.tsx          # Main Application shell
     |   |-- index.css        # Tailwind directives
     |   `-- main.tsx         # React root
     |-- .env                 # Frontend environment variables
