@@ -52,7 +52,7 @@ export function AdminSettings() {
               <div className="flex items-center justify-between">
                 <div>
                   <h4 className="text-sm font-bold text-primary">Auto-Matching</h4>
-                  <p className="text-xs text-text-muted mt-1">Automatically assign mentors if compatibility score is > 90%.</p>
+                  <p className="text-xs text-text-muted mt-1">Automatically assign mentors if compatibility score is &gt; 90%.</p>
                 </div>
                 <div 
                   onClick={() => setSettings(s => ({ ...s, autoMatch: !s.autoMatch }))}
