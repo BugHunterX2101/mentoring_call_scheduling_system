@@ -8,9 +8,10 @@ import { FileText, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 export function MenteeDashboard() {
   const [requirements, setRequirements] = useState<any[]>([]);
   const [slots, setSlots] = useState<TimeSlot[]>([]);
-  const [isSaving, setIsSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
   const [callType, setCallType] = useState('resume_revamp');
   const [description, setDescription] = useState('');
+  const [callTypesList, setCallTypesList] = useState<Array<{value: string, label: string}>>([]);
   
   // Dynamic Tags state
   const [tags, setTags] = useState<string[]>([]);
@@ -40,13 +41,21 @@ export function MenteeDashboard() {
 
   const fetchData = useCallback(async () => {
     try {
-      const [reqsData, availData, aiData] = await Promise.all([
+      const [reqsData, availData, aiData, typesData] = await Promise.all([
         apiClient.fetch('/requirements/me'),
         apiClient.fetch('/availability/me'),
-        apiClient.fetch('/recommendations/summary')
+        apiClient.fetch('/recommendations/summary'),
+        apiClient.fetch('/settings/call-types').catch(() => ({ callTypes: [] }))
       ]);
       setRequirements(reqsData.requirements || []);
       setAiSummary(aiData);
+      if (typesData.callTypes && typesData.callTypes.length > 0) {
+        setCallTypesList(typesData.callTypes);
+        // default select to first if not matches
+        if (!typesData.callTypes.find((t: any) => t.value === callType)) {
+          setCallType(typesData.callTypes[0].value);
+        }
+      }
       
       if (availData.slots) {
         setSlots(availData.slots.map((s: any) => ({
@@ -66,17 +75,19 @@ export function MenteeDashboard() {
   }, [fetchData]);
 
   const handleSaveAvailability = async () => {
-    setIsSaving(true);
+    setSaveStatus('saving');
     try {
       await apiClient.fetch('/availability/me', {
         method: 'PUT',
         body: JSON.stringify({ slots: slots.map(s => ({ ...s, timezone: 'UTC', is_recurring: true })) })
       });
       fetchData();
+      setSaveStatus('success');
+      setTimeout(() => setSaveStatus('idle'), 3000);
     } catch (error) {
       console.error(error);
-    } finally {
-      setIsSaving(false);
+      setSaveStatus('error');
+      setTimeout(() => setSaveStatus('idle'), 3000);
     }
   };
 
@@ -151,10 +162,17 @@ export function MenteeDashboard() {
             <div className="mt-6 flex justify-end pt-4 border-t border-border-subtle">
               <button 
                 onClick={handleSaveAvailability} 
-                disabled={isSaving}
-                className="px-6 py-2.5 bg-primary text-white text-sm font-bold rounded hover:bg-primary/90 transition-colors disabled:opacity-50"
+                disabled={saveStatus === 'saving'}
+                className={`px-6 py-2.5 text-white text-sm font-bold rounded transition-colors disabled:opacity-50 ${
+                  saveStatus === 'success' ? 'bg-[#059669] hover:bg-[#047857]' : 
+                  saveStatus === 'error' ? 'bg-red-500 hover:bg-red-600' : 
+                  'bg-primary hover:bg-primary/90'
+                }`}
               >
-                {isSaving ? 'Saving...' : 'Save Schedule'}
+                {saveStatus === 'saving' ? 'Saving...' : 
+                 saveStatus === 'success' ? '✓ Saved!' : 
+                 saveStatus === 'error' ? 'Failed!' : 
+                 'Save Schedule'}
               </button>
             </div>
           </div>
@@ -177,9 +195,13 @@ export function MenteeDashboard() {
                   value={callType} onChange={e => setCallType(e.target.value)}
                   className="w-full border border-border-subtle rounded-md p-2.5 text-sm text-primary focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
                 >
-                  <option value="resume_revamp">Resume Revamp</option>
-                  <option value="career_pivot">Career Pivot</option>
-                  <option value="system_architecture">System Architecture</option>
+                  {callTypesList.length === 0 ? (
+                    <option value="resume_revamp">Resume Revamp</option>
+                  ) : (
+                    callTypesList.map(t => (
+                      <option key={t.value} value={t.value}>{t.label}</option>
+                    ))
+                  )}
                 </select>
               </div>
               

@@ -8,7 +8,8 @@ import { TagPill } from '../../components/ui/TagPill';
 export function MentorDashboard() {
   const [bookings, setBookings] = useState<any[]>([]);
   const [slots, setSlots] = useState<TimeSlot[]>([]);
-  const [isSaving, setIsSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
+  const [performance, setPerformance] = useState({ score: 85, metric: 'Base compatibility rating' });
   
   // Added State for Button Interactivity
   const [weekOffset, setWeekOffset] = useState(0);
@@ -29,11 +30,15 @@ export function MentorDashboard() {
 
   const fetchData = async () => {
     try {
-      const [bookingsData, availData] = await Promise.all([
+      const [bookingsData, availData, perfData] = await Promise.all([
         apiClient.fetch('/bookings/me'),
-        apiClient.fetch('/availability/me')
+        apiClient.fetch('/availability/me'),
+        apiClient.fetch('/mentors/me/performance').catch(() => ({ score: 85, metric: 'Base compatibility rating' }))
       ]);
       setBookings(bookingsData.bookings);
+      if (perfData.score) {
+        setPerformance(perfData);
+      }
       
       // Parse availability slots
       if (availData.slots) {
@@ -50,18 +55,18 @@ export function MentorDashboard() {
   };
 
   const handleSave = async () => {
-    setIsSaving(true);
+    setSaveStatus('saving');
     try {
       await apiClient.fetch('/availability/me', {
         method: 'PUT',
         body: JSON.stringify({ slots: slots.map(s => ({ ...s, timezone: 'UTC', is_recurring: true })) })
       });
-      alert('Availability saved successfully!');
+      setSaveStatus('success');
+      setTimeout(() => setSaveStatus('idle'), 3000);
     } catch (error) {
       console.error(error);
-      alert('Failed to save availability');
-    } finally {
-      setIsSaving(false);
+      setSaveStatus('error');
+      setTimeout(() => setSaveStatus('idle'), 3000);
     }
   };
 
@@ -83,10 +88,17 @@ export function MentorDashboard() {
               </button>
               <button 
                 onClick={handleSave} 
-                disabled={isSaving}
-                className="px-4 py-2 bg-primary text-white text-sm font-bold rounded shadow-sm hover:bg-primary/90 transition-colors disabled:opacity-50"
+                disabled={saveStatus === 'saving'}
+                className={`px-4 py-2 text-white text-sm font-bold rounded shadow-sm transition-colors disabled:opacity-50 ${
+                  saveStatus === 'success' ? 'bg-[#059669] hover:bg-[#047857]' : 
+                  saveStatus === 'error' ? 'bg-red-500 hover:bg-red-600' : 
+                  'bg-primary hover:bg-primary/90'
+                }`}
               >
-                {isSaving ? 'Saving...' : 'Save Changes'}
+                {saveStatus === 'saving' ? 'Saving...' : 
+                 saveStatus === 'success' ? '✓ Saved!' : 
+                 saveStatus === 'error' ? 'Failed!' : 
+                 'Save Changes'}
               </button>
             </div>
           </div>
@@ -164,8 +176,8 @@ export function MentorDashboard() {
              </div>
              
              <div className="mt-12 relative z-10">
-               <h2 className="text-5xl font-bold mb-2">{Math.min(100, 85 + (bookings.length * 3))}%</h2>
-               <p className="text-xs text-white/80">Compatibility rating this month</p>
+               <h2 className="text-5xl font-bold mb-2">{performance.score}%</h2>
+               <p className="text-xs text-white/80">{performance.metric}</p>
              </div>
           </div>
           

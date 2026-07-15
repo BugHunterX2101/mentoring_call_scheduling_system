@@ -23,16 +23,12 @@ const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 // Helper to get dates for the next week's given days
 function getDatesForDays(daysToDisplay: number[]) {
   const today = new Date();
-  const currentDay = today.getDay();
+  const currentWeekSunday = new Date(today);
+  currentWeekSunday.setDate(today.getDate() - today.getDay());
   
   return daysToDisplay.map(targetDay => {
-    const date = new Date(today);
-    // Find the next occurrence of targetDay
-    let diff = targetDay - currentDay;
-    if (diff <= 0) {
-      diff += 7; // Ensure it's in the future
-    }
-    date.setDate(today.getDate() + diff);
+    const date = new Date(currentWeekSunday);
+    date.setDate(currentWeekSunday.getDate() + targetDay);
     return {
       dayOfWeek: targetDay,
       dayName: DAYS[targetDay],

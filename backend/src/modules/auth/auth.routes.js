@@ -42,9 +42,22 @@ router.post('/login', async (req, res) => {
   }
 });
 
+const forbiddenDomains = ['example.com', 'test.com', 'demo.com', 'mailinator.com', 'tempmail.com'];
+
 router.post('/signup', async (req, res) => {
   const { name, email, password, role } = req.body;
   try {
+    if (!password || password.length < 8) {
+      return res.status(400).json({ error: 'Password must be at least 8 characters long' });
+    }
+    if (!email || !email.includes('@')) {
+      return res.status(400).json({ error: 'Invalid email format' });
+    }
+    const domain = email.split('@')[1].toLowerCase();
+    if (forbiddenDomains.includes(domain)) {
+      return res.status(400).json({ error: 'Please use a valid, verified email domain (test/disposable domains are not allowed)' });
+    }
+
     // Check if user exists
     const existing = await db.query('SELECT id FROM users WHERE email = $1', [email]);
     if (existing.rows.length > 0) {

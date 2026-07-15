@@ -41,7 +41,7 @@ router.get('/summary', requireAuth, async (req, res) => {
   try {
     // Generate some dynamic mock stats for the Mentee Dashboard AI Helper
     const mentorRes = await db.query('SELECT COUNT(*) as count FROM users WHERE role = $1', ['mentor']);
-    const availRes = await db.query('SELECT COUNT(DISTINCT mentor_id) as overlap_count FROM availability');
+    const availRes = await db.query('SELECT COUNT(DISTINCT owner_id) as overlap_count FROM availability WHERE owner_id IN (SELECT id FROM users WHERE role = $1)', ['mentor']);
     
     res.json({
       summary: `Based on your recent availability, we found ${availRes.rows[0].overlap_count || 3} mentors matching your timezone specializing in your requested fields.`,

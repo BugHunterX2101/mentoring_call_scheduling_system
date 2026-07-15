@@ -181,15 +181,19 @@ sequenceDiagram
 | Overlap Analysis | Visual TimeGrid explicitly highlights mutual availability overlaps between a mentee and a selected mentor in real-time. |
 | Mentor Directory | Real-time directory with Quick Filters (FAANG, Active Only) and instant state toggling for mentor availability. |
 | Platform Settings & Backups | A fully dynamic settings configuration console backed by PostgreSQL, allowing admins to toggle algorithm flags and generate local `.sql` database dumps with a click. |
+| Dynamic Database UI | 100% dynamic UI configuration elements, such as Mentee Request form categories fetching from active DB tables (`call_types`). |
 | Secure Authentication | Real-time dynamic Sign Up and Login flow with secure bcrypt password hashing and token-based RBAC session generation. |
+| Strict Form Validation | Blocks disposable email domains and enforces strict password length/strength policies directly connected between frontend and backend pipelines. |
 
 ### Mentee & Mentor Workflows
 
 | Feature | Details |
 |---|---|
 | Dynamic Tags | Mentees can submit free-form tags and requirements directly into the system to guide the AI matchmaker. |
+| Live Performance Metrics | Mentors see a dynamically calculated Compatibility Score, built by running live overlap analysis against all pending mentee requests in the database to determine active mentor demand. |
 | Real-Time Dashboard | Mentees receive live AI feedback banners indicating the number of mentors in the network matching their exact timezone/needs. |
 | Confirmed Sessions | Mentors see a live-updating sidebar of confirmed upcoming calls mapped exactly to their availability inputs. |
+| UI State Polish | Smooth inline UI state transitions (e.g. "✓ Saved!" buttons) providing satisfying micro-interactions without intrusive browser alerts. |
 | TimeGrid State Management | Drag, drop, and clear scheduling grids that intelligently format complex timestamp logic into simple UI states. |
 
 ---

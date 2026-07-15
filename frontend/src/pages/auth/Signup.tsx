@@ -20,8 +20,26 @@ export function Signup() {
     }
   }, [user, navigate]);
 
+  const validateForm = () => {
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters long');
+      return false;
+    }
+    const domain = email.split('@')[1]?.toLowerCase();
+    const forbiddenDomains = ['example.com', 'test.com', 'demo.com', 'mailinator.com', 'tempmail.com'];
+    if (!domain || forbiddenDomains.includes(domain)) {
+      setError('Please use a valid, verified email domain (test domains like example.com are not allowed)');
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    
+    if (!validateForm()) return;
+
     try {
       const data = await apiClient.fetch('/auth/signup', {
         method: 'POST',

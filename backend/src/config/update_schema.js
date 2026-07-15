@@ -22,6 +22,26 @@ async function updateSchema() {
       WHERE quote IS NULL;
     `);
 
+    console.log('Creating call_types table...');
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS call_types (
+        id SERIAL PRIMARY KEY,
+        value VARCHAR(50) UNIQUE NOT NULL,
+        label VARCHAR(50) NOT NULL,
+        is_active BOOLEAN DEFAULT true
+      );
+    `);
+
+    // Insert default call types
+    await db.query(`
+      INSERT INTO call_types (value, label) VALUES 
+        ('resume_revamp', 'Resume Revamp'),
+        ('career_pivot', 'Career Pivot'),
+        ('system_architecture', 'System Architecture'),
+        ('mock_interview', 'Mock Interview')
+      ON CONFLICT (value) DO NOTHING;
+    `);
+
     console.log('Schema updated successfully!');
   } catch (error) {
     console.error('Error updating schema:', error);
