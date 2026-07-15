@@ -9,7 +9,7 @@ export function MenteeDashboard() {
   const [requirements, setRequirements] = useState<any[]>([]);
   const [slots, setSlots] = useState<TimeSlot[]>([]);
   const [isSaving, setIsSaving] = useState(false);
-  const [callType, setCallType] = useState('Resume Revamp');
+  const [callType, setCallType] = useState('resume_revamp');
   const [description, setDescription] = useState('');
   
   // Dynamic Tags state
@@ -174,9 +174,9 @@ export function MenteeDashboard() {
                   value={callType} onChange={e => setCallType(e.target.value)}
                   className="w-full border border-border-subtle rounded-md p-2.5 text-sm text-primary focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
                 >
-                  <option value="Resume Revamp">Resume Revamp</option>
-                  <option value="Career Pivot">Career Pivot</option>
-                  <option value="System Architecture">System Architecture</option>
+                  <option value="resume_revamp">Resume Revamp</option>
+                  <option value="career_pivot">Career Pivot</option>
+                  <option value="system_architecture">System Architecture</option>
                 </select>
               </div>
               

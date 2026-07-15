@@ -29,10 +29,10 @@
 
 This project delivers a **fully functional, AI-powered mentoring and scheduling platform** designed to eliminate the friction of pairing junior talent with senior industry experts. It is built as a complete full-stack application, prioritizing seamless UX, automated matchmaking, and a robust data model.
 
-- **Intelligent Matchmaking**: Integrates with Groq AI (LLaMA 3.1) to analyze mentee requirements, rank the most qualified mentors, and generate natural language rationales for the match.
+- **Intelligent Matchmaking**: Integrates with Groq AI (LLaMA 3.1) to analyze mentee requirements, rank the most qualified mentors, and generate natural language rationales for the match. Features a robust fallback engine that ensures seamless scheduling even during strict tag mismatches or API timeouts.
 - **Advanced Scheduling Engine**: Features a bespoke React-based TimeGrid for managing complex availability schedules, mathematically ensuring overlap precision.
 - **Role-Based Architecture**: Distinct, real-time dashboards for Mentees, Mentors, and Platform Administrators powered by an Express.js and PostgreSQL backend.
-- **Enterprise UI/UX**: High-fidelity interfaces utilizing Tailwind CSS, offering optimistic UI updates and interactive data filtering out-of-the-box.
+- **Enterprise UI/UX**: High-fidelity interfaces utilizing Tailwind CSS, offering optimistic UI updates, strict client-to-server payload mapping, and interactive data filtering out-of-the-box.
 
 ---
 

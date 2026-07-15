@@ -7,6 +7,12 @@ const router = express.Router();
 
 router.post('/', requireAuth, rbac(['user']), async (req, res) => {
   const { callType, description, tags } = req.body;
+  const validCallTypes = ['resume_revamp', 'career_pivot', 'system_architecture', 'job_market_guidance', 'mock_interview'];
+  
+  if (!validCallTypes.includes(callType)) {
+    return res.status(400).json({ error: 'Invalid call type provided' });
+  }
+
   try {
     const result = await db.query(
       `INSERT INTO requirements (user_id, call_type, description, status) 
