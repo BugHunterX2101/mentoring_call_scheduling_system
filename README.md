@@ -78,6 +78,42 @@ The core relational models driving the platform include:
 - `bookings`: Finalized, confirmed sessions mapping a mentee, mentor, and specific datetime range.
 - `recommendations`: Cached AI scoring outputs mapping requirements to potential mentors.
 
+```mermaid
+erDiagram
+    USERS ||--o{ USER_PROFILES : has
+    USERS ||--o{ MENTOR_PROFILES : has
+    USERS ||--o{ REQUIREMENTS : creates
+    USERS ||--o{ AVAILABILITY : sets
+    USERS ||--o{ BOOKINGS : "participates (as mentor or mentee)"
+    
+    REQUIREMENTS ||--o{ RECOMMENDATIONS : generates
+    MENTOR_PROFILES ||--o{ RECOMMENDATIONS : receives
+    
+    REQUIREMENTS ||--o| BOOKINGS : results_in
+    
+    USERS {
+        int id PK
+        string name
+        string email
+        string role "admin, user, mentor"
+    }
+    
+    REQUIREMENTS {
+        int id PK
+        int user_id FK
+        string call_type
+        string status "pending, matched, booked"
+    }
+    
+    BOOKINGS {
+        int id PK
+        int requirement_id FK
+        int user_id FK
+        int mentor_id FK
+        datetime start_time
+    }
+```
+
 ## Directory Structure
 
 ```text
@@ -145,3 +181,30 @@ Follow these steps to deploy the application locally for development or testing:
 - **Mentee Workflow:** Register as a User. Navigate to the dashboard, input your weekly availability on the TimeGrid, and submit a new Mentoring Requirement with custom skill tags.
 - **Mentor Workflow:** Register as a Mentor. Update your recurring weekly availability. View your confirmed upcoming calls on the right-hand sidebar.
 - **Administrator Workflow:** Log in as an Admin. View the Requirements Queue to see all pending mentee requests. Select multiple requests and run a Batch Match. Navigate to the Matching Workspace to review AI rationales, observe the visual calendar overlap between the Mentee and the Mentor, and finalize the booking.
+
+### Core Booking Flow
+
+```mermaid
+sequenceDiagram
+    actor Mentee
+    actor Mentor
+    actor Admin
+    participant System
+    participant GeminiAI
+    
+    Mentee->>System: Submit Requirement (Call Type, Description)
+    Mentee->>System: Update Weekly Availability
+    Mentor->>System: Update Weekly Availability
+    
+    Admin->>System: Select Pending Requirements & Run Batch Match
+    System->>GeminiAI: Send Requirement + Mentor Pool
+    GeminiAI-->>System: Return Ranked List & Rationales
+    System->>System: Save Recommendations
+    
+    Admin->>System: Open Matching Workspace
+    System-->>Admin: Display AI Rationale & Mutual Overlap Grid
+    Admin->>System: Select Time Slot & Confirm Booking
+    System->>System: Finalize Booking & Remove Used Slots
+    
+    System-->>Mentor: Show Confirmed Call on Dashboard
+```
