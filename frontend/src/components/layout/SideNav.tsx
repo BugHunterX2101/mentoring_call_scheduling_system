@@ -85,8 +85,19 @@ export function SideNav() {
       <div className="p-6 mt-auto">
         {user.role !== 'mentor' && (
           <button 
-            onClick={() => {
-              if (user.role === 'admin') navigate('/admin/requirements');
+            onClick={async () => {
+              if (user.role === 'admin') {
+                try {
+                  const res = await apiClient.fetch('/requirements?status=pending');
+                  if (res.requirements && res.requirements.length > 0) {
+                    navigate(`/admin/requirements/${res.requirements[0].id}/match`);
+                  } else {
+                    navigate('/admin/requirements'); // fallback
+                  }
+                } catch(e) {
+                  navigate('/admin/requirements');
+                }
+              }
               else if (user.role === 'user') {
                 navigate('/user/dashboard');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -95,7 +106,7 @@ export function SideNav() {
             className="w-full flex items-center justify-center gap-2 bg-primary text-white py-3 px-4 rounded hover:bg-primary/90 transition-colors text-sm font-medium mb-6 shadow-sm"
           >
             <Plus size={16} />
-            New Match Session
+            {user.role === 'admin' ? 'Start Match Session' : 'New Match Session'}
           </button>
         )}
         <div className="flex items-center gap-3">
