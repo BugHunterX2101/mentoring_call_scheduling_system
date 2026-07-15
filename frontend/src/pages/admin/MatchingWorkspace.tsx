@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../../components/layout/DashboardLayout';
 import { apiClient } from '../../lib/api/client';
 import { TagPill } from '../../components/ui/TagPill';
-import { TimeGrid, TimeSlot } from '../../components/ui/TimeGrid';
+import { TimeGrid, type TimeSlot } from '../../components/ui/TimeGrid';
 import { Sparkles, Calendar, Search } from 'lucide-react';
 
 export function MatchingWorkspace() {

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { DashboardLayout } from '../../components/layout/DashboardLayout';
 import { apiClient } from '../../lib/api/client';
 import { TagPill } from '../../components/ui/TagPill';
-import { TimeGrid, TimeSlot } from '../../components/ui/TimeGrid';
+import { TimeGrid, type TimeSlot } from '../../components/ui/TimeGrid';
 import { FileText, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export function MenteeDashboard() {

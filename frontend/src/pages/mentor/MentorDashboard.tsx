@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { DashboardLayout } from '../../components/layout/DashboardLayout';
 import { apiClient } from '../../lib/api/client';
-import { TimeGrid, TimeSlot } from '../../components/ui/TimeGrid';
+import { TimeGrid, type TimeSlot } from '../../components/ui/TimeGrid';
 import { Calendar, Video, Phone } from 'lucide-react';
 import { TagPill } from '../../components/ui/TagPill';
 

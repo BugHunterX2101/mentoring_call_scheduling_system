@@ -4,6 +4,7 @@ import { AuthProvider } from '../lib/auth/AuthContext';
 import { RoleGuard } from './RoleGuard';
 
 import { Login } from '../pages/auth/Login';
+import { DashboardLayout } from '../components/layout/DashboardLayout';
 
 import { MenteeDashboard } from '../pages/user/MenteeDashboard';
 import { MentorDashboard } from '../pages/mentor/MentorDashboard';
@@ -54,10 +55,37 @@ export function AppRoutes() {
           />
 
           <Route 
+            path="/admin/dashboard" 
+            element={<Navigate to="/admin/requirements" replace />} 
+          />
+
+          <Route 
             path="/admin/mentors" 
             element={
               <RoleGuard allowedRoles={['admin']}>
                 <MentorDirectory />
+              </RoleGuard>
+            } 
+          />
+
+          <Route 
+            path="/admin/bookings" 
+            element={
+              <RoleGuard allowedRoles={['admin']}>
+                <DashboardLayout title="Bookings">
+                  <div className="p-8"><h2 className="text-xl">All Bookings (Coming Soon)</h2></div>
+                </DashboardLayout>
+              </RoleGuard>
+            } 
+          />
+
+          <Route 
+            path="/admin/settings" 
+            element={
+              <RoleGuard allowedRoles={['admin']}>
+                <DashboardLayout title="Settings">
+                  <div className="p-8"><h2 className="text-xl">Settings (Coming Soon)</h2></div>
+                </DashboardLayout>
               </RoleGuard>
             } 
           />
