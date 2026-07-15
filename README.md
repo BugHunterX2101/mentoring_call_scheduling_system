@@ -4,7 +4,7 @@
 
 <h1>Mentoring Call Scheduling System</h1>
 <p><strong>An intelligent, real-time matchmaking and scheduling platform for industry mentorship</strong></p>
-<p>Built with Node.js · React 18 · TypeScript · PostgreSQL · Tailwind CSS · Google Gemini AI</p>
+<p>Built with Node.js · React 18 · TypeScript · PostgreSQL · Tailwind CSS · Groq AI (LLaMA 3)</p>
 
 <br/>
 
@@ -18,7 +18,7 @@
 ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1?logo=postgresql&logoColor=white)
-![Google Gemini](https://img.shields.io/badge/Google_Gemini-AI-4285F4?logo=google&logoColor=white)
+![Groq](https://img.shields.io/badge/Groq-AI-F55036?logo=groq&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-06B6D4?logo=tailwindcss&logoColor=white)
 
 </div>
@@ -29,7 +29,7 @@
 
 This project delivers a **fully functional, AI-powered mentoring and scheduling platform** designed to eliminate the friction of pairing junior talent with senior industry experts. It is built as a complete full-stack application, prioritizing seamless UX, automated matchmaking, and a robust data model.
 
-- **Intelligent Matchmaking**: Integrates with Google Gemini AI to analyze mentee requirements, rank the most qualified mentors, and generate natural language rationales for the match.
+- **Intelligent Matchmaking**: Integrates with Groq AI (LLaMA 3.1) to analyze mentee requirements, rank the most qualified mentors, and generate natural language rationales for the match.
 - **Advanced Scheduling Engine**: Features a bespoke React-based TimeGrid for managing complex availability schedules, mathematically ensuring overlap precision.
 - **Role-Based Architecture**: Distinct, real-time dashboards for Mentees, Mentors, and Platform Administrators powered by an Express.js and PostgreSQL backend.
 - **Enterprise UI/UX**: High-fidelity interfaces utilizing Tailwind CSS, offering optimistic UI updates and interactive data filtering out-of-the-box.
@@ -57,7 +57,7 @@ graph TD
     end
     
     subgraph External ["External Services"]
-        Gemini[Google Gemini API]
+        Groq[Groq API (LLaMA)]
     end
 
     Browser -->|REST API| Auth
@@ -72,7 +72,7 @@ graph TD
     Bookings --> DB
     AI --> DB
     
-    AI <-->|Prompt Generation| Gemini
+    AI <-->|Prompt Generation| Groq
 ```
 
 ### Database Schema (ERD)
@@ -152,14 +152,14 @@ sequenceDiagram
     participant Mentee
     participant Admin
     participant System
-    participant GeminiAI
+    participant GroqAI
     
     Mentee->>System: Submit Requirement (Call Type, Description)
     Mentee->>System: Update Weekly Availability
     
     Admin->>System: Select Pending Requirements & Run Batch Match
-    System->>GeminiAI: Send Requirement + Mentor Pool
-    GeminiAI-->>System: Return Ranked List & Rationales
+    System->>GroqAI: Send Requirement + Mentor Pool
+    GroqAI-->>System: Return Ranked List & Rationales
     System->>System: Save Recommendations
     
     Admin->>System: Open Matching Workspace
@@ -176,7 +176,7 @@ sequenceDiagram
 
 | Feature | Details |
 |---|---|
-| AI-Powered Matching | Evaluates mentor pools against mentee needs using Google Gemini, returning a ranked fit score and customized rationale. |
+| AI-Powered Matching | Evaluates mentor pools against mentee needs using Groq's LLaMA 3.1, returning a ranked fit score and customized rationale. |
 | Batch Processing | Multi-select interface in the Requirements Queue to trigger background matching for dozens of mentees simultaneously. |
 | Overlap Analysis | Visual TimeGrid explicitly highlights mutual availability overlaps between a mentee and a selected mentor. |
 | Mentor Directory | Real-time directory with Quick Filters (FAANG, Active Only) and instant state toggling for mentor availability. |
@@ -200,7 +200,7 @@ sequenceDiagram
 | **Styling** | Tailwind CSS | Custom utility classes tailored to replicate enterprise SaaS design tokens. |
 | **Backend Framework** | Node.js + Express.js | High-performance RESTful API architecture. |
 | **Database** | PostgreSQL | Robust relational storage with the pg client wrapper. |
-| **Artificial Intelligence** | Google Generative AI SDK | Integrates gemini-1.5-flash for high-speed, JSON-structured output ranking. |
+| **Artificial Intelligence** | Groq SDK | Integrates LLaMA-3.1-8b-instant for blazing-fast, JSON-structured output ranking. |
 | **Security** | bcrypt & JWT | Industry-standard password hashing and secure token-based session generation. |
 
 ---
@@ -231,7 +231,7 @@ Configure your `/backend/.env` file:
 PORT=5000
 DATABASE_URL=postgresql://user:password@localhost:5432/your_database
 JWT_SECRET=your_super_secret_key
-LLM_API_KEY=your_google_gemini_api_key
+GROQ_API_KEY=your_groq_api_key
 ```
 
 Execute the server:
