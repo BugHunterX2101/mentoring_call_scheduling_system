@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../lib/auth/AuthContext';
+import { apiClient } from '../../lib/api/client';
 import { LayoutDashboard, Users, Calendar, Settings, Plus, List } from 'lucide-react';
 
 export function SideNav() {
