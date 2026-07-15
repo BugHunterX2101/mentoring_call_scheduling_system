@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DashboardLayout } from '../../components/layout/DashboardLayout';
 import { Settings, Bell, Shield, Database, Save } from 'lucide-react';
+import { apiClient } from '../../lib/api/client';
 
 export function AdminSettings() {
   const [isSaving, setIsSaving] = useState(false);
@@ -15,31 +16,59 @@ export function AdminSettings() {
     timezone: 'UTC'
   });
 
-  const handleSave = () => {
+  useEffect(() => {
+    apiClient.fetch('/settings')
+      .then(data => {
+        if (data && Object.keys(data).length > 0) {
+          setSettings(s => ({ ...s, ...data }));
+        }
+      })
+      .catch(console.error);
+  }, []);
+
+  const handleSave = async () => {
     setIsSaving(true);
     setActionMessage('');
-    setTimeout(() => {
-      setIsSaving(false);
+    try {
+      await apiClient.fetch('/settings', {
+        method: 'PATCH',
+        body: JSON.stringify(settings)
+      });
       setActionMessage('Settings saved successfully.');
-    }, 800);
+    } catch(e) {
+      setActionMessage('Failed to save settings.');
+      console.error(e);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleBackup = () => {
+  const handleBackup = async () => {
     setIsBackingUp(true);
     setActionMessage('');
-    setTimeout(() => {
+    try {
+      const res = await apiClient.fetch('/settings/backup', { method: 'POST' });
+      setActionMessage(`Database backup successfully exported: ${res.file}`);
+    } catch(e) {
+      setActionMessage('Failed to backup database.');
+      console.error(e);
+    } finally {
       setIsBackingUp(false);
-      setActionMessage('Database backup successfully exported and stored in cloud.');
-    }, 1500);
+    }
   };
 
-  const handleClearCache = () => {
+  const handleClearCache = async () => {
     setIsClearingCache(true);
     setActionMessage('');
-    setTimeout(() => {
-      setIsClearingCache(false);
+    try {
+      await apiClient.fetch('/settings/clear-cache', { method: 'POST' });
       setActionMessage('System cache cleared across all edges.');
-    }, 800);
+    } catch(e) {
+      setActionMessage('Failed to clear cache.');
+      console.error(e);
+    } finally {
+      setIsClearingCache(false);
+    }
   };
 
   return (

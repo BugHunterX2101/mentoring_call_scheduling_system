@@ -4,6 +4,7 @@ import { AuthProvider } from '../lib/auth/AuthContext';
 import { RoleGuard } from './RoleGuard';
 
 import { Login } from '../pages/auth/Login';
+import { Signup } from '../pages/auth/Signup';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
 
 import { MenteeDashboard } from '../pages/user/MenteeDashboard';
@@ -21,6 +22,7 @@ export function AppRoutes() {
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
           
           <Route 
             path="/user/dashboard" 

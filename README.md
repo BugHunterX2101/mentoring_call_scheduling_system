@@ -177,9 +177,11 @@ sequenceDiagram
 | Feature | Details |
 |---|---|
 | AI-Powered Matching | Evaluates mentor pools against mentee needs using Groq's LLaMA 3.1, returning a ranked fit score and customized rationale. |
-| Batch Processing | Multi-select interface in the Requirements Queue to trigger background matching for dozens of mentees simultaneously. |
-| Overlap Analysis | Visual TimeGrid explicitly highlights mutual availability overlaps between a mentee and a selected mentor. |
+| Batch Processing | Multi-select interface in the Requirements Queue to trigger background matching for dozens of mentees simultaneously using the LLaMA 3.1 LLM pipeline. |
+| Overlap Analysis | Visual TimeGrid explicitly highlights mutual availability overlaps between a mentee and a selected mentor in real-time. |
 | Mentor Directory | Real-time directory with Quick Filters (FAANG, Active Only) and instant state toggling for mentor availability. |
+| Platform Settings & Backups | A fully dynamic settings configuration console backed by PostgreSQL, allowing admins to toggle algorithm flags and generate local `.sql` database dumps with a click. |
+| Secure Authentication | Real-time dynamic Sign Up and Login flow with secure bcrypt password hashing and token-based RBAC session generation. |
 
 ### Mentee & Mentor Workflows
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 export interface TimeSlot {
   day_of_week: number; // 0=Sunday, 1=Monday... 6=Saturday
@@ -13,17 +13,46 @@ interface TimeGridProps {
   onSlotsChange?: (newSlots: TimeSlot[]) => void;
   startHour?: number; // default 9 (09:00)
   endHour?: number;   // default 15 (15:00)
+  selectedSlot?: TimeSlot | null;
+  onSlotSelect?: (slot: TimeSlot) => void;
+  displayDays?: number[];
 }
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-// We only show Mon to Fri in some views, but let's support Mon-Sun if needed.
-// For the UI matching the screenshot, it shows Mon-Sun or Mon-Fri depending on view.
-// Let's default to Mon-Sun.
-const DISPLAY_DAYS = [1, 2, 3, 4, 5, 6, 0]; // Mon, Tue, Wed, Thu, Fri, Sat, Sun
+// Helper to get dates for the next week's given days
+function getDatesForDays(daysToDisplay: number[]) {
+  const today = new Date();
+  const currentDay = today.getDay();
+  
+  return daysToDisplay.map(targetDay => {
+    const date = new Date(today);
+    // Find the next occurrence of targetDay
+    let diff = targetDay - currentDay;
+    if (diff <= 0) {
+      diff += 7; // Ensure it's in the future
+    }
+    date.setDate(today.getDate() + diff);
+    return {
+      dayOfWeek: targetDay,
+      dayName: DAYS[targetDay],
+      dateNumber: date.getDate()
+    };
+  });
+}
 
-export function TimeGrid({ slots, editable = false, onSlotsChange, startHour = 9, endHour = 15 }: TimeGridProps) {
+export function TimeGrid({ 
+  slots, 
+  editable = false, 
+  onSlotsChange, 
+  startHour = 9, 
+  endHour = 15,
+  selectedSlot,
+  onSlotSelect,
+  displayDays = [1, 2, 3, 4, 5] // Default to Mon-Fri
+}: TimeGridProps) {
   const hours = Array.from({ length: endHour - startHour + 1 }, (_, i) => startHour + i);
+  const dates = getDatesForDays(displayDays);
 
   const toggleSlot = (day: number, hour: number) => {
     if (!editable || !onSlotsChange) return;
@@ -34,12 +63,10 @@ export function TimeGrid({ slots, editable = false, onSlotsChange, startHour = 9
     const existingIndex = slots.findIndex(s => s.day_of_week === day && s.start_time === start_time);
     
     if (existingIndex >= 0) {
-      // Remove slot
       const newSlots = [...slots];
       newSlots.splice(existingIndex, 1);
       onSlotsChange(newSlots);
     } else {
-      // Add slot
       onSlotsChange([...slots, { day_of_week: day, start_time, end_time, type: 'available' }]);
     }
   };
@@ -50,67 +77,78 @@ export function TimeGrid({ slots, editable = false, onSlotsChange, startHour = 9
   };
 
   return (
-    <div className="border border-border-subtle rounded-md overflow-hidden bg-white">
+    <div className="border border-border-subtle rounded-sm overflow-hidden bg-white">
       {/* Header */}
-      <div className="grid grid-cols-[80px_1fr_1fr_1fr_1fr_1fr_1fr_1fr] border-b border-border-subtle">
+      <div 
+        className="grid border-b border-border-subtle" 
+        style={{ gridTemplateColumns: `80px repeat(${displayDays.length}, minmax(0, 1fr))` }}
+      >
         <div className="p-3 text-center text-xs font-medium text-text-muted border-r border-border-subtle"></div>
-        {DISPLAY_DAYS.map(day => (
-          <div key={day} className="p-3 text-center border-r border-border-subtle last:border-r-0">
-            <div className="text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1">{DAYS[day]}</div>
-            {/* The mock shows specific dates like "14", "15" in some views, but we can leave this simple or pass it in. For now just day name is fine, we can add a date prop later if needed */}
+        {dates.map((d, idx) => (
+          <div key={d.dayOfWeek} className={`p-4 flex flex-col items-center justify-center ${idx < dates.length - 1 ? 'border-r border-border-subtle' : ''}`}>
+            <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">{d.dayName}</span>
+            <span className="text-xl font-bold text-primary">{d.dateNumber}</span>
           </div>
         ))}
       </div>
 
       {/* Grid Body */}
-      <div className="bg-surface relative">
+      <div className="bg-white relative">
         {hours.map(hour => (
-          <div key={hour} className="grid grid-cols-[80px_1fr_1fr_1fr_1fr_1fr_1fr_1fr] border-b border-border-subtle last:border-b-0 min-h-[60px]">
+          <div 
+            key={hour} 
+            className="grid border-b border-border-subtle last:border-b-0 min-h-[60px]"
+            style={{ gridTemplateColumns: `80px repeat(${displayDays.length}, minmax(0, 1fr))` }}
+          >
             {/* Time Label */}
-            <div className="p-2 border-r border-border-subtle flex items-start justify-center bg-white pt-3">
-              <span className="text-[10px] font-bold text-text-muted">{hour.toString().padStart(2, '0')}:00</span>
+            <div className="p-2 border-r border-border-subtle flex items-start justify-center bg-white pt-4">
+              <span className="text-[10px] font-bold text-text-muted tracking-widest">{hour.toString().padStart(2, '0')}:00</span>
             </div>
             
             {/* Day Cells */}
-            {DISPLAY_DAYS.map(day => {
+            {dates.map((d, idx) => {
+              const day = d.dayOfWeek;
               const slot = getSlot(day, hour);
-              let cellClass = "border-r border-border-subtle last:border-r-0 p-1 bg-white relative transition-colors bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:12px_12px]";
-              let content = null;
+              let cellClass = `p-1 bg-white relative transition-colors ${idx < dates.length - 1 ? 'border-r border-border-subtle' : ''}`;
               
               if (editable) {
                 cellClass += " cursor-pointer hover:bg-surface-container-low";
               }
-
+              
+              let content = null;
+              
               if (slot) {
                 if (slot.type === 'mentor' || (editable && window.location.pathname.includes('mentor'))) {
-                   // Mentor "AVAILABLE" block
                    content = (
-                     <div className="absolute inset-0 bg-primary text-white p-2 rounded shadow-sm z-10 flex flex-col justify-start items-start">
+                     <div className="absolute inset-0 bg-primary text-white p-2 rounded-sm shadow-sm z-10 flex flex-col justify-start items-start m-1">
                        <span className="text-[9px] font-bold tracking-widest uppercase">Available</span>
                        <span className="text-[10px] font-bold">{hour.toString().padStart(2, '0')}:00 — {hour + 1}:00</span>
                      </div>
                    );
                 } else if (slot.type === 'user' || (editable && window.location.pathname.includes('user'))) {
-                   // Mentee block (Black box with checkmark)
                    content = (
-                     <div className="absolute inset-1 bg-primary text-white flex items-center justify-center rounded shadow-sm z-10">
+                     <div className="absolute inset-1 bg-primary text-white flex items-center justify-center rounded-sm shadow-sm z-10">
                        <span className="text-sm font-bold">✓</span>
                      </div>
                    );
                 } else if (slot.type === 'overlap') {
-                   // Mutual Overlap block
-                   content = (
-                     <div className="absolute inset-1 bg-blue-50 text-blue-600 flex flex-col justify-center items-center rounded border-2 border-dashed border-blue-300 z-10 p-1">
-                       <span className="text-[9px] font-bold tracking-widest uppercase leading-tight text-center">Mutual<br/>Window</span>
-                     </div>
-                   );
-                } else {
-                   // Admin Matching Workspace 'SELECT' block
-                   content = (
-                     <div className="absolute inset-1 bg-white border-2 border-primary text-primary flex items-center justify-center rounded shadow-sm hover:bg-primary hover:text-white transition-colors z-10">
-                       <span className="text-[10px] font-bold tracking-widest">SELECT</span>
-                     </div>
-                   );
+                   const isSelected = selectedSlot?.day_of_week === day && selectedSlot?.start_time === slot.start_time;
+                   if (isSelected) {
+                     content = (
+                       <div className="absolute inset-1 bg-primary text-white flex flex-col justify-center items-center rounded-sm z-10 shadow-md">
+                         <span className="text-[10px] font-bold tracking-widest uppercase">Selected</span>
+                       </div>
+                     );
+                   } else {
+                     content = (
+                       <div 
+                         className="absolute inset-1 bg-blue-50 hover:bg-white text-primary flex flex-col justify-center items-center rounded-sm border-2 border-transparent hover:border-primary z-10 cursor-pointer transition-colors group"
+                         onClick={() => onSlotSelect?.(slot)}
+                       >
+                         <span className="text-[10px] font-bold tracking-widest uppercase opacity-0 group-hover:opacity-100 transition-opacity">Select</span>
+                       </div>
+                     );
+                   }
                 }
               }
 
@@ -118,9 +156,9 @@ export function TimeGrid({ slots, editable = false, onSlotsChange, startHour = 9
                 <div 
                   key={`${day}-${hour}`} 
                   className={cellClass}
-                  onClick={() => toggleSlot(day, hour)}
+                  onClick={() => editable ? toggleSlot(day, hour) : null}
                 >
-                  <div className="w-full h-full border border-transparent rounded group relative">
+                  <div className="w-full h-full border border-transparent rounded-sm group relative">
                      {content}
                   </div>
                 </div>

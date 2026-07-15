@@ -97,6 +97,8 @@ router.patch('/:id/status', requireAuth, rbac(['admin']), async (req, res) => {
   }
 });
 
+const { getRecommendationsForRequirement } = require('../recommendations/groqService');
+
 router.post('/batch-match', requireAuth, rbac(['admin']), async (req, res) => {
   try {
     const { ids } = req.body;
@@ -104,12 +106,36 @@ router.post('/batch-match', requireAuth, rbac(['admin']), async (req, res) => {
       return res.status(400).json({ error: 'Missing requirements ids' });
     }
     
-    // Simulating batch matching - update all to "matched"
-    // In reality this might trigger an async job or multiple /recommendation calls
-    const query = `UPDATE requirements SET status = 'matched' WHERE id = ANY($1) RETURNING *`;
-    const result = await db.query(query, [ids]);
+    // Ensure assigned_mentor_id column exists
+    await db.query(`ALTER TABLE requirements ADD COLUMN IF NOT EXISTS assigned_mentor_id UUID REFERENCES users(id)`);
     
-    res.json({ message: 'Batch match successful', updated: result.rows.length });
+    let matchedCount = 0;
+    for (const id of ids) {
+       try {
+          const reqRes = await db.query('SELECT * FROM requirements WHERE id = $1', [id]);
+          if (reqRes.rows.length === 0) continue;
+          
+          // Use AI to get recommendations
+          const matches = await getRecommendationsForRequirement(id);
+          
+          if (matches && matches.length > 0) {
+             const topMatch = matches[0];
+             // Assign the top mentor to the requirement and mark as matched
+             await db.query(
+                `UPDATE requirements SET status = 'matched', assigned_mentor_id = $1 WHERE id = $2`,
+                [topMatch.id, id]
+             );
+             matchedCount++;
+          } else {
+             // Mark as failed if no matches
+             await db.query(`UPDATE requirements SET status = 'failed' WHERE id = $1`, [id]);
+          }
+       } catch (err) {
+          console.error(`Error matching requirement ${id}:`, err);
+       }
+    }
+    
+    res.json({ message: 'Batch match completed', updated: matchedCount });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal server error' });

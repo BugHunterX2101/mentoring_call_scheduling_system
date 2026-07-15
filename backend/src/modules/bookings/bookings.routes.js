@@ -42,9 +42,11 @@ router.get('/me', requireAuth, async (req, res) => {
     const result = await db.query(
       `SELECT b.*, 
               u.name as user_name, u.email as user_email, 
+              p.tags as user_tags,
               m.name as mentor_name, m.email as mentor_email 
        FROM bookings b
        JOIN users u ON b.user_id = u.id
+       LEFT JOIN user_profiles p ON u.id = p.user_id
        JOIN users m ON b.mentor_id = m.id
        WHERE b.${roleCol} = $1
        ORDER BY b.start_time ASC`, [req.user.id]

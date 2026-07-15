@@ -26,10 +26,13 @@ export function MenteeDashboard() {
 
   // Date Calculation
   const getWeekDates = (offset: number) => {
-    const start = new Date(2024, 6, 14); // Baseline July 14, 2024 as per design
-    start.setDate(start.getDate() + (offset * 7));
+    const today = new Date();
+    const start = new Date(today);
+    // Find the current week's Sunday
+    start.setDate(today.getDate() - today.getDay() + (offset * 7));
+    
     const end = new Date(start);
-    end.setDate(end.getDate() + 6);
+    end.setDate(start.getDate() + 6);
     
     const formatOpts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
     return `${start.toLocaleDateString('en-US', formatOpts)} — ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;

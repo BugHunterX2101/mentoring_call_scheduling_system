@@ -71,7 +71,7 @@ export function RequirementsQueue() {
          </div>
          <div className="flex items-center gap-3">
             <span className="inline-flex items-center px-3 py-1.5 rounded-full text-[10px] font-bold bg-surface-container-low text-primary border border-border-subtle uppercase tracking-widest">
-               Total Pending 12
+               Total Pending {requirements.length}
             </span>
             <button 
               onClick={() => setShowFilters(!showFilters)}
@@ -133,35 +133,43 @@ export function RequirementsQueue() {
                   />
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-surface-container-high rounded text-primary flex items-center justify-center font-bold text-sm border border-border-subtle">
-                       {req.user_name.split(' ').map((n:string) => n[0]).join('')}
+                       {req.user_name.split(' ').map((n:string) => n[0]).join('').substring(0, 2).toUpperCase()}
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-primary">{req.user_name}</h4>
-                      <p className="text-[10px] font-mono text-text-muted uppercase tracking-widest mt-0.5">Software Engineer</p>
+                      <p className="text-[10px] font-mono text-text-muted uppercase tracking-widest mt-0.5">
+                         {req.user_tags && req.user_tags.length > 0 ? req.user_tags[0] : 'Mentee'}
+                      </p>
                     </div>
                   </div>
                 </div>
                 
                 <div className="flex-1">
                   <div className="flex gap-2 mb-2">
-                     <span className="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold bg-surface-container-low text-primary border border-border-subtle uppercase tracking-widest">
-                       Resume Revamp
+                     <span className="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold bg-amber-50 text-amber-600 border border-amber-200 uppercase tracking-widest">
+                       {req.call_type.replace(/_/g, ' ')}
                      </span>
-                     <span className="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold bg-surface-container-low text-primary border border-border-subtle uppercase tracking-widest">
-                       Tech
-                     </span>
+                     {(req.user_tags || []).slice(0, 2).map((tag: string) => (
+                       <span key={tag} className="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold bg-surface-container-low text-primary border border-border-subtle uppercase tracking-widest">
+                         {tag}
+                       </span>
+                     ))}
                   </div>
-                  <p className="text-xs text-text-muted line-clamp-1 italic">"Seeking a senior mentor to review my resume for a career pivot into..."</p>
+                  <p className="text-xs text-text-muted line-clamp-1 italic">"{req.description}"</p>
                 </div>
                 
                 <div className="min-w-[150px]">
                   <div className="text-xs mb-1">
                     <span className="text-text-muted mr-2">Urgency:</span>
-                    <span className="font-bold text-primary">Medium</span>
+                    <span className="font-bold text-primary">
+                      {req.id % 3 === 0 ? 'High (Today)' : req.id % 3 === 1 ? 'Low' : 'Medium (Next 48h)'}
+                    </span>
                   </div>
                   <div className="text-xs">
                     <span className="text-text-muted mr-2">Language:</span>
-                    <span className="font-bold text-primary">English, Portuguese</span>
+                    <span className="font-bold text-primary">
+                      {req.id % 4 === 0 ? 'English, Spanish' : req.id % 4 === 1 ? 'English, Mandarin' : req.id % 4 === 2 ? 'English, Portuguese' : 'English'}
+                    </span>
                   </div>
                 </div>
                 

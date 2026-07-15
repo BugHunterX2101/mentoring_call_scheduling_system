@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../lib/auth/AuthContext';
 import { apiClient } from '../../lib/api/client';
 
-export function Login() {
+export function Signup() {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState('user');
   const [error, setError] = useState('');
   const { login, user } = useAuth();
   const navigate = useNavigate();
@@ -21,9 +23,14 @@ export function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const data = await apiClient.fetch('/auth/login', {
+      const data = await apiClient.fetch('/auth/signup', {
         method: 'POST',
-        body: JSON.stringify({ email: email.trim(), password: password.trim() }),
+        body: JSON.stringify({ 
+          name: name.trim(), 
+          email: email.trim(), 
+          password: password.trim(),
+          role 
+        }),
       });
       login(data.token, data.user);
     } catch (err: any) {
@@ -35,7 +42,7 @@ export function Login() {
     <div className="min-h-screen bg-background flex flex-col justify-center items-center p-4">
       <div className="bg-surface-container-lowest border border-border-subtle rounded-lg shadow-sm p-8 max-w-md w-full">
         <h1 className="text-headline-lg text-primary text-center mb-2">Mentorque</h1>
-        <p className="text-body-md text-text-muted text-center mb-8">Sign in to your account</p>
+        <p className="text-body-md text-text-muted text-center mb-8">Create your account</p>
         
         {error && (
           <div className="bg-error-container text-on-error-container p-3 rounded mb-4 text-body-sm">
@@ -44,6 +51,16 @@ export function Login() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-body-sm text-text-muted mb-1">Full Name</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full border border-border-subtle rounded p-2 focus:outline-none focus:border-primary"
+              required
+            />
+          </div>
           <div>
             <label className="block text-body-sm text-text-muted mb-1">Email Address</label>
             <input
@@ -64,25 +81,27 @@ export function Login() {
               required
             />
           </div>
+          <div>
+            <label className="block text-body-sm text-text-muted mb-1">I want to...</label>
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              className="w-full border border-border-subtle rounded p-2 focus:outline-none focus:border-primary"
+            >
+              <option value="user">Find a Mentor</option>
+              <option value="mentor">Become a Mentor</option>
+            </select>
+          </div>
           <button
             type="submit"
             className="w-full bg-primary text-on-primary py-2 rounded-md font-medium mt-4 hover:bg-opacity-90 transition-opacity"
           >
-            Sign In
+            Create Account
           </button>
         </form>
         
-        <div className="mt-8 pt-4 border-t border-border-subtle text-body-sm text-text-muted">
-          <div className="text-center mb-4">
-            <p>Don't have an account? <Link to="/signup" className="text-primary hover:underline font-medium">Sign up here</Link></p>
-          </div>
-          <p><strong>Demo Accounts:</strong></p>
-          <ul className="list-disc pl-4 mt-2">
-            <li>Admin: admin@mentorque.com</li>
-            <li>Mentor: mentor1@example.com</li>
-            <li>User: user1@example.com</li>
-            <li>Password: password123 (adminpassword for admin)</li>
-          </ul>
+        <div className="mt-6 pt-4 border-t border-border-subtle text-center text-body-sm text-text-muted">
+          <p>Already have an account? <Link to="/login" className="text-primary hover:underline font-medium">Sign in here</Link></p>
         </div>
       </div>
     </div>

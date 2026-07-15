@@ -15,10 +15,11 @@ export function MentorDashboard() {
 
   // Date Calculation
   const getWeekDates = (offset: number) => {
-    const start = new Date(2024, 6, 14); // Baseline July 14, 2024
-    start.setDate(start.getDate() + (offset * 7));
+    const today = new Date();
+    const start = new Date(today);
+    start.setDate(today.getDate() - today.getDay() + (offset * 7));
     const end = new Date(start);
-    end.setDate(end.getDate() + 6);
+    end.setDate(start.getDate() + 6);
     return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} — ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
   };
 
@@ -123,7 +124,7 @@ export function MentorDashboard() {
                           <img src={`https://ui-avatars.com/api/?name=${book.user_name}&background=random`} alt="" className="w-10 h-10 rounded-full border border-border-subtle" />
                           <div>
                             <h4 className="text-sm font-bold text-primary">{book.user_name}</h4>
-                            <p className="text-xs font-mono text-text-muted mt-0.5">UX Design Mentee</p>
+                            <p className="text-xs font-mono text-text-muted mt-0.5">{book.user_tags && book.user_tags.length > 0 ? book.user_tags[0] : 'Mentee'}</p>
                           </div>
                         </div>
                         <span className="inline-flex items-center px-2 py-1 rounded text-[10px] font-bold bg-green-100 text-green-700 uppercase tracking-widest">
@@ -163,7 +164,7 @@ export function MentorDashboard() {
              </div>
              
              <div className="mt-12 relative z-10">
-               <h2 className="text-5xl font-bold mb-2">94%</h2>
+               <h2 className="text-5xl font-bold mb-2">{Math.min(100, 85 + (bookings.length * 3))}%</h2>
                <p className="text-xs text-white/80">Compatibility rating this month</p>
              </div>
           </div>

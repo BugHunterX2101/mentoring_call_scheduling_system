@@ -8,6 +8,7 @@ const requirementsRoutes = require('./modules/requirements/requirements.routes')
 const mentorsRoutes = require('./modules/mentors/mentors.routes');
 const recommendationsRoutes = require('./modules/recommendations/recommendations.routes');
 const bookingsRoutes = require('./modules/bookings/bookings.routes');
+const settingsRoutes = require('./modules/settings/settings.routes');
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.use('/api/requirements', requirementsRoutes);
 app.use('/api/mentors', mentorsRoutes);
 app.use('/api/recommendations', recommendationsRoutes);
 app.use('/api/bookings', bookingsRoutes);
+app.use('/api/settings', settingsRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
