@@ -2,10 +2,10 @@ const express = require('express');
 const db = require('../../config/db');
 const { requireAuth } = require('../../middleware/auth.middleware');
 const { requireRole: rbac } = require('../../middleware/rbac.middleware');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const Groq = require('groq-sdk');
 
 const router = express.Router();
-const genAI = new GoogleGenerativeAI(process.env.LLM_API_KEY);
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 router.post('/:requirementId', requireAuth, rbac(['admin']), async (req, res) => {
   try {
@@ -52,8 +52,7 @@ router.post('/:requirementId', requireAuth, rbac(['admin']), async (req, res) =>
     }
 
     // 2. LLM Ranking & Rationale 
-    // We send candidates to Gemini to score them out of 100 and write a 1-2 sentence rationale.
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", generationConfig: { responseMimeType: "application/json" } });
+    // We send candidates to Groq to score them out of 100 and write a 1-2 sentence rationale.
     
     const prompt = `
       You are an expert matchmaking assistant. Rank the following mentor candidates for a user's requirement.
@@ -67,22 +66,27 @@ router.post('/:requirementId', requireAuth, rbac(['admin']), async (req, res) =>
       ${candidates.map(c => `ID: ${c.id}, Name: ${c.name}, Tags: ${(c.tags || []).join(', ')}, Description: ${c.description}`).join('\n\n')}
       
       Output JSON in this format:
-      [
-        { "mentor_id": "...", "fit_score": 95, "rationale": "Strong fit..." }
-      ]
+      {
+        "matches": [
+          { "mentor_id": "...", "fit_score": 95, "rationale": "Strong fit..." }
+        ]
+      }
       Sort by fit_score descending. Provide a 1-2 sentence rationale per mentor. Keep it concise.
     `;
 
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
-    let ranked;
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [{ role: "user", content: prompt }],
+      model: "llama-3.1-8b-instant",
+      response_format: { type: "json_object" },
+    });
+
+    const text = chatCompletion.choices[0]?.message?.content || '{"matches": []}';
+    let ranked = [];
     try {
-      ranked = JSON.parse(text);
+      const parsed = JSON.parse(text);
+      ranked = parsed.matches || [];
     } catch (e) {
-      // Fallback parser if JSON is dirty
-      const jsonStart = text.indexOf('[');
-      const jsonEnd = text.lastIndexOf(']') + 1;
-      ranked = JSON.parse(text.substring(jsonStart, jsonEnd));
+      console.error("Failed to parse JSON response from LLM", text);
     }
 
     // Format final response and persist to DB
