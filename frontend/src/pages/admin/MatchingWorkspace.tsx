@@ -197,9 +197,10 @@ export function MatchingWorkspace() {
                      <span className="text-[11px] font-bold text-primary">4.9 <span className="text-text-muted font-normal">(120)</span></span>
                   </div>
                 </div>
-              ))
-            )}
-          </div>
+              </div>
+            ))
+          )}
+        </div>
         </div>
 
         {/* Right Column: Overlap Analysis */}
