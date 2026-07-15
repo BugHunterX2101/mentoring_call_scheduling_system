@@ -29,9 +29,9 @@ export default {
         'badge-gray-text': '#475569',
       },
       fontFamily: {
-        'sans': ['Inter', 'sans-serif'],
-        'heading': ['Geist', 'sans-serif'],
-        'mono': ['JetBrains Mono', 'monospace'],
+        'sans': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'heading': ['Outfit', 'sans-serif'],
+        'mono': ['"JetBrains Mono"', 'monospace'],
       },
       borderRadius: {
         'sm': '0.125rem',
