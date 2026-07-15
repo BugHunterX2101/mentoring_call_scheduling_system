@@ -11,6 +11,9 @@ import { MentorDashboard } from '../pages/mentor/MentorDashboard';
 import { RequirementsQueue } from '../pages/admin/RequirementsQueue';
 import { MatchingWorkspace } from '../pages/admin/MatchingWorkspace';
 import { MentorDirectory } from '../pages/admin/MentorDirectory';
+import { AdminDashboard } from '../pages/admin/AdminDashboard';
+import { AdminBookings } from '../pages/admin/AdminBookings';
+import { AdminSettings } from '../pages/admin/AdminSettings';
 
 export function AppRoutes() {
   return (
@@ -56,7 +59,11 @@ export function AppRoutes() {
 
           <Route 
             path="/admin/dashboard" 
-            element={<Navigate to="/admin/requirements" replace />} 
+            element={
+              <RoleGuard allowedRoles={['admin']}>
+                <AdminDashboard />
+              </RoleGuard>
+            } 
           />
 
           <Route 
@@ -72,9 +79,7 @@ export function AppRoutes() {
             path="/admin/bookings" 
             element={
               <RoleGuard allowedRoles={['admin']}>
-                <DashboardLayout title="Bookings">
-                  <div className="p-8"><h2 className="text-xl">All Bookings (Coming Soon)</h2></div>
-                </DashboardLayout>
+                <AdminBookings />
               </RoleGuard>
             } 
           />
@@ -83,9 +88,7 @@ export function AppRoutes() {
             path="/admin/settings" 
             element={
               <RoleGuard allowedRoles={['admin']}>
-                <DashboardLayout title="Settings">
-                  <div className="p-8"><h2 className="text-xl">Settings (Coming Soon)</h2></div>
-                </DashboardLayout>
+                <AdminSettings />
               </RoleGuard>
             } 
           />

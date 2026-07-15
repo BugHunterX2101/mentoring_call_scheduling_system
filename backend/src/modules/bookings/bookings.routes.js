@@ -56,4 +56,22 @@ router.get('/me', requireAuth, async (req, res) => {
   }
 });
 
+router.get('/all', requireAuth, rbac(['admin']), async (req, res) => {
+  try {
+    const result = await db.query(
+      `SELECT b.*, 
+              u.name as user_name, u.email as user_email, 
+              m.name as mentor_name, m.email as mentor_email 
+       FROM bookings b
+       JOIN users u ON b.user_id = u.id
+       JOIN users m ON b.mentor_id = m.id
+       ORDER BY b.start_time DESC`
+    );
+    res.json({ bookings: result.rows });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;
