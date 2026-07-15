@@ -16,7 +16,7 @@ export function AdminDashboard() {
     async function fetchStats() {
       try {
         const [reqsRes, mentorsRes, bookingsRes] = await Promise.all([
-          apiClient.fetch('/requirements/all').catch(() => ({ requirements: [] })),
+          apiClient.fetch('/requirements').catch(() => ({ requirements: [] })),
           apiClient.fetch('/mentors').catch(() => ({ mentors: [] })),
           apiClient.fetch('/bookings/all').catch(() => ({ bookings: [] }))
         ]);

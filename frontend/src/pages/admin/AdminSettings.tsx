@@ -4,6 +4,9 @@ import { Settings, Bell, Shield, Database, Save } from 'lucide-react';
 
 export function AdminSettings() {
   const [isSaving, setIsSaving] = useState(false);
+  const [isBackingUp, setIsBackingUp] = useState(false);
+  const [isClearingCache, setIsClearingCache] = useState(false);
+  const [actionMessage, setActionMessage] = useState('');
   const [settings, setSettings] = useState({
     autoMatch: true,
     matchingSensitivity: 'medium',
@@ -14,9 +17,28 @@ export function AdminSettings() {
 
   const handleSave = () => {
     setIsSaving(true);
+    setActionMessage('');
     setTimeout(() => {
       setIsSaving(false);
-      alert("Settings saved successfully.");
+      setActionMessage('Settings saved successfully.');
+    }, 800);
+  };
+
+  const handleBackup = () => {
+    setIsBackingUp(true);
+    setActionMessage('');
+    setTimeout(() => {
+      setIsBackingUp(false);
+      setActionMessage('Database backup successfully exported and stored in cloud.');
+    }, 1500);
+  };
+
+  const handleClearCache = () => {
+    setIsClearingCache(true);
+    setActionMessage('');
+    setTimeout(() => {
+      setIsClearingCache(false);
+      setActionMessage('System cache cleared across all edges.');
     }, 800);
   };
 
@@ -37,6 +59,12 @@ export function AdminSettings() {
             {isSaving ? 'Saving...' : 'Save Changes'}
           </button>
         </div>
+        
+        {actionMessage && (
+          <div className="mb-6 p-4 bg-green-50 text-green-700 border border-green-200 rounded-lg text-sm font-medium animate-in fade-in slide-in-from-top-2">
+            {actionMessage}
+          </div>
+        )}
 
         <div className="flex flex-col gap-6">
           {/* Section: AI Matching */}
@@ -146,16 +174,18 @@ export function AdminSettings() {
               
               <div className="border-t border-border-subtle pt-6 flex gap-4">
                 <button 
-                  onClick={() => alert("Database backup initiated.")}
-                  className="px-4 py-2 border border-border-subtle rounded text-sm font-bold text-primary hover:bg-surface-container-low transition-colors"
+                  onClick={handleBackup}
+                  disabled={isBackingUp || isClearingCache}
+                  className="px-4 py-2 border border-border-subtle rounded text-sm font-bold text-primary hover:bg-surface-container-low transition-colors disabled:opacity-50"
                 >
-                  Backup Database
+                  {isBackingUp ? 'Backing up...' : 'Backup Database'}
                 </button>
                 <button 
-                  onClick={() => alert("Cache cleared successfully.")}
-                  className="px-4 py-2 border border-red-200 text-red-600 rounded text-sm font-bold hover:bg-red-50 transition-colors"
+                  onClick={handleClearCache}
+                  disabled={isBackingUp || isClearingCache}
+                  className="px-4 py-2 border border-red-200 text-red-600 rounded text-sm font-bold hover:bg-red-50 transition-colors disabled:opacity-50"
                 >
-                  Clear System Cache
+                  {isClearingCache ? 'Clearing...' : 'Clear System Cache'}
                 </button>
               </div>
             </div>

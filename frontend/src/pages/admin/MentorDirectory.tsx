@@ -9,6 +9,10 @@ export function MentorDirectory() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('All Mentors');
   const [currentPage, setCurrentPage] = useState(1);
+  const [quickEditId, setQuickEditId] = useState<string | null>(null);
+  const [editDesc, setEditDesc] = useState('');
+  const [editTags, setEditTags] = useState('');
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const itemsPerPage = 6;
 
   useEffect(() => {
@@ -19,17 +23,31 @@ export function MentorDirectory() {
   }, []);
 
   const handleToggle = async (id: string, currentStatus: boolean) => {
-    // Optimistic UI update
     setMentors(mentors.map(m => m.id === id ? { ...m, is_active: !currentStatus } : m));
     try {
       await apiClient.fetch(`/mentors/${id}`, {
         method: 'PATCH',
-        body: JSON.stringify({ is_active: !currentStatus })
+        body: JSON.stringify({ isActive: !currentStatus })
       });
     } catch (e) {
       console.error(e);
-      // Revert on failure
       setMentors(mentors.map(m => m.id === id ? { ...m, is_active: currentStatus } : m));
+    }
+  };
+
+  const handleSaveEdit = async (id: string) => {
+    const tagsArr = editTags.split(',').map(t => t.trim()).filter(Boolean);
+    
+    setMentors(mentors.map(m => m.id === id ? { ...m, description: editDesc, tags: tagsArr } : m));
+    try {
+      await apiClient.fetch(`/mentors/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ description: editDesc, tags: tagsArr })
+      });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setQuickEditId(null);
     }
   };
 
@@ -63,18 +81,12 @@ export function MentorDirectory() {
                 {f}
               </button>
             ))}
-            <button 
-              onClick={() => alert("Showing additional quick filters...")}
-              className="px-4 py-1.5 bg-transparent border border-border-subtle text-primary text-[10px] font-bold rounded-full uppercase tracking-widest hover:bg-surface-container-low flex items-center gap-1"
-            >
-              <span>+</span> More
-            </button>
           </div>
         </div>
         <div className="flex items-center gap-6">
           <span className="text-xs font-bold text-text-muted uppercase tracking-wider">{filteredMentors.length} Mentors Total</span>
           <button 
-            onClick={() => alert("Advanced Filters Modal is under development.")}
+            onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
             className="flex items-center gap-2 px-4 py-2 bg-white border border-border-subtle text-primary text-xs font-bold rounded shadow-sm hover:bg-surface-container-low"
           >
             <SlidersHorizontal size={14} />
@@ -82,6 +94,13 @@ export function MentorDirectory() {
           </button>
         </div>
       </div>
+      
+      {showAdvancedFilters && (
+         <div className="bg-white border border-border-subtle rounded-lg p-4 mb-6 shadow-sm flex items-center gap-4 animate-in fade-in slide-in-from-top-4 text-sm text-text-muted">
+           No advanced filters configured for this view yet.
+           <button onClick={() => setShowAdvancedFilters(false)} className="ml-auto text-primary font-bold">Close</button>
+         </div>
+      )}
 
       {loading ? (
         <p className="text-text-muted">Loading directory...</p>
@@ -120,12 +139,6 @@ export function MentorDirectory() {
                       {(featuredMentor.tags || ['General']).map((t: string) => (
                         <TagPill key={t} label={t} color="gray" />
                       ))}
-                      <button 
-                        onClick={() => alert("Edit tags modal opening...")}
-                        className="text-xs text-text-muted border border-dashed border-outline-variant px-3 py-1 rounded hover:bg-surface-container-low transition-colors ml-auto"
-                      >
-                        + Edit Tags
-                      </button>
                     </div>
                   </div>
                 </div>
@@ -182,17 +195,53 @@ export function MentorDirectory() {
                     {m.tags && m.tags.length > 2 && <span className="text-xs text-text-muted">+{m.tags.length - 2}</span>}
                   </div>
                   
-                  <p className="text-sm text-text-muted italic mb-6 line-clamp-2">
-                    "{m.quote || "Focused on high-fidelity prototyping and stakeholder management..."}"
-                  </p>
+                  {quickEditId === m.id ? (
+                    <div className="mb-4">
+                       <input 
+                         type="text" 
+                         value={editDesc} 
+                         onChange={e => setEditDesc(e.target.value)} 
+                         className="w-full text-xs p-1 mb-2 border rounded" 
+                         placeholder="Description"
+                       />
+                       <input 
+                         type="text" 
+                         value={editTags} 
+                         onChange={e => setEditTags(e.target.value)} 
+                         className="w-full text-xs p-1 border rounded" 
+                         placeholder="Tags (comma separated)"
+                       />
+                    </div>
+                  ) : (
+                    <p className="text-sm text-text-muted italic mb-6 line-clamp-2">
+                      "{m.description || "Focused on high-fidelity prototyping and stakeholder management..."}"
+                    </p>
+                  )}
                 </div>
                 
-                <button 
-                  onClick={() => alert(`Opening Quick Edit for ${m.name}`)}
-                  className="w-full py-2 border border-border-subtle rounded text-sm font-medium text-primary hover:bg-surface transition-colors"
-                >
-                  Quick Edit
-                </button>
+                {quickEditId === m.id ? (
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => handleSaveEdit(m.id)}
+                      className="flex-1 py-2 bg-primary text-white rounded text-sm font-medium hover:bg-primary/90 transition-colors"
+                    >Save</button>
+                    <button 
+                      onClick={() => setQuickEditId(null)}
+                      className="flex-1 py-2 border border-border-subtle rounded text-sm font-medium text-text-muted hover:bg-surface transition-colors"
+                    >Cancel</button>
+                  </div>
+                ) : (
+                  <button 
+                    onClick={() => {
+                      setQuickEditId(m.id);
+                      setEditDesc(m.description || '');
+                      setEditTags((m.tags || []).join(', '));
+                    }}
+                    className="w-full py-2 border border-border-subtle rounded text-sm font-medium text-primary hover:bg-surface transition-colors"
+                  >
+                    Quick Edit
+                  </button>
+                )}
               </div>
             ))}
           </div>

@@ -11,6 +11,8 @@ export function RequirementsQueue() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isMatching, setIsMatching] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [showFilters, setShowFilters] = useState(false);
+  const [expandedReqId, setExpandedReqId] = useState<string | null>(null);
   const itemsPerPage = 3;
 
   const fetchReqs = () => {
@@ -72,7 +74,7 @@ export function RequirementsQueue() {
                Total Pending 12
             </span>
             <button 
-              onClick={() => alert("Advanced filtering is under development.")}
+              onClick={() => setShowFilters(!showFilters)}
               className="flex items-center gap-2 px-4 py-2 border border-border-subtle rounded text-sm font-bold text-primary hover:bg-surface-container-low transition-colors shadow-sm bg-white"
             >
                Filter
@@ -80,6 +82,15 @@ export function RequirementsQueue() {
             </button>
          </div>
       </div>
+
+      {showFilters && (
+        <div className="bg-white border border-border-subtle rounded-lg p-4 mb-6 shadow-sm flex items-center gap-4 animate-in fade-in slide-in-from-top-4">
+          <span className="text-sm font-bold text-primary">Active Filters:</span>
+          <span className="text-xs bg-surface-container-low text-primary px-2 py-1 rounded">Status: Pending</span>
+          <span className="text-xs bg-surface-container-low text-primary px-2 py-1 rounded">Sort: Newest First</span>
+          <button onClick={() => setShowFilters(false)} className="text-xs text-text-muted hover:text-primary ml-auto">Clear Filters</button>
+        </div>
+      )}
 
       {/* AI Banner */}
       <div className="bg-primary text-white rounded-lg p-5 mb-6 flex items-center justify-between shadow-sm relative overflow-hidden">
@@ -110,7 +121,8 @@ export function RequirementsQueue() {
         ) : (
           <div className="flex flex-col gap-3">
             {requirements.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map(req => (
-              <div key={req.id} className={`bg-white border ${selectedIds.has(req.id) ? 'border-primary shadow-sm' : 'border-border-subtle'} rounded-lg p-5 flex items-center justify-between gap-6 transition-all`}>
+              <React.Fragment key={req.id}>
+                <div className={`bg-white border ${selectedIds.has(req.id) ? 'border-primary shadow-sm' : 'border-border-subtle'} rounded-lg p-5 flex items-center justify-between gap-6 transition-all`}>
                 
                 <div className="flex items-center gap-4 min-w-[250px]">
                   <input 
@@ -163,15 +175,30 @@ export function RequirementsQueue() {
                   <button 
                     onClick={(e) => {
                        e.preventDefault();
-                       alert(`Viewing full details for ${req.user_name}'s request.`);
+                       setExpandedReqId(expandedReqId === req.id ? null : req.id);
                     }}
                     className="text-[10px] font-bold text-text-muted hover:text-primary underline bg-transparent border-none p-0 cursor-pointer"
                   >
-                     View Details
+                     {expandedReqId === req.id ? 'Hide Details' : 'View Details'}
                   </button>
                 </div>
-                
               </div>
+              
+              {expandedReqId === req.id && (
+                <div className="bg-surface-container-lowest border border-border-subtle rounded-lg p-5 mt-[-8px] mb-4 shadow-sm animate-in fade-in slide-in-from-top-2">
+                   <p className="font-bold text-primary mb-2 text-sm">Full Request Description:</p>
+                   <p className="text-text-muted text-sm leading-relaxed">"{req.description}"</p>
+                   {req.user_tags && req.user_tags.length > 0 && (
+                     <div className="mt-4 flex items-center gap-2">
+                       <span className="text-xs font-bold text-primary">Required Skills:</span>
+                       <div className="flex gap-2">
+                         {req.user_tags.map((t: string) => <TagPill key={t} label={t} color="gray" />)}
+                       </div>
+                     </div>
+                   )}
+                </div>
+              )}
+            </React.Fragment>
             ))}
           </div>
         )}

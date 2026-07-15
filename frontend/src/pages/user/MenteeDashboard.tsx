@@ -22,6 +22,7 @@ export function MenteeDashboard() {
   // Added States for Button Interactivity
   const [weekOffset, setWeekOffset] = useState(0);
   const [expandedReqId, setExpandedReqId] = useState<string | null>(null);
+  const [showAllHistory, setShowAllHistory] = useState(false);
 
   // Date Calculation
   const getWeekDates = (offset: number) => {
@@ -247,10 +248,10 @@ export function MenteeDashboard() {
         <div className="p-6 border-b border-border-subtle flex items-center justify-between">
           <h3 className="text-lg font-bold text-primary">My Requests</h3>
           <button 
-            onClick={() => alert("Full history view is in development.")}
+            onClick={() => setShowAllHistory(!showAllHistory)}
             className="text-xs font-bold text-blue-500 hover:underline bg-transparent border-none p-0 cursor-pointer"
           >
-            View All History
+            {showAllHistory ? 'Show Less' : 'View All History'}
           </button>
         </div>
         
@@ -271,7 +272,7 @@ export function MenteeDashboard() {
                   <td colSpan={5} className="px-6 py-4 text-center text-text-muted">No requests found.</td>
                 </tr>
               ) : (
-                requirements.map(req => (
+                (showAllHistory ? requirements : requirements.slice(0, 3)).map(req => (
                   <React.Fragment key={req.id}>
                     <tr className="border-b border-border-subtle last:border-0 hover:bg-surface-container-low">
                       <td className="px-6 py-4">

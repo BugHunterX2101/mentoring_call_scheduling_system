@@ -8,6 +8,7 @@ export function AdminBookings() {
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const [expandedBookingId, setExpandedBookingId] = useState<string | null>(null);
   const itemsPerPage = 8;
 
   useEffect(() => {
@@ -27,6 +28,24 @@ export function AdminBookings() {
     });
   };
 
+  const handleExportCSV = () => {
+    if (bookings.length === 0) return;
+    const headers = ['ID', 'Mentee', 'Mentor', 'Start Time', 'End Time', 'Status'];
+    const csvContent = [
+      headers.join(','),
+      ...bookings.map(b => `${b.id},"${b.user_name}","${b.mentor_name}","${new Date(b.start_time).toISOString()}","${new Date(b.end_time).toISOString()}","${b.status}"`)
+    ].join('\\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `bookings_export_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <DashboardLayout title="Bookings" searchPlaceholder="Search bookings...">
       <div className="flex items-center justify-between mb-8">
@@ -35,7 +54,7 @@ export function AdminBookings() {
           <p className="text-sm text-text-muted mt-1">View and manage all active and historical mentor sessions.</p>
         </div>
         <button 
-          onClick={() => alert("Downloading CSV...")}
+          onClick={handleExportCSV}
           className="flex items-center gap-2 px-4 py-2 bg-white border border-border-subtle text-primary text-sm font-bold rounded shadow-sm hover:bg-surface-container-low transition-colors"
         >
           <Download size={14} />
@@ -67,7 +86,8 @@ export function AdminBookings() {
                 </tr>
               ) : (
                 currentBookings.map((b) => (
-                  <tr key={b.id} className="border-b border-border-subtle last:border-b-0 hover:bg-surface/50 transition-colors">
+                  <React.Fragment key={b.id}>
+                  <tr className="border-b border-border-subtle last:border-b-0 hover:bg-surface/50 transition-colors">
                     <td className="py-4 px-6 text-sm font-medium text-text-muted">
                       #{b.id.substring(0,6)}
                     </td>
@@ -97,13 +117,40 @@ export function AdminBookings() {
                     </td>
                     <td className="py-4 px-6 text-right">
                       <button 
-                        onClick={() => alert(`View details for booking ${b.id}`)}
+                        onClick={() => setExpandedBookingId(expandedBookingId === b.id ? null : b.id)}
                         className="text-xs font-bold text-text-muted hover:text-primary underline transition-colors"
                       >
-                        Details
+                        {expandedBookingId === b.id ? 'Close' : 'Details'}
                       </button>
                     </td>
                   </tr>
+                  
+                  {expandedBookingId === b.id && (
+                    <tr className="bg-surface-container-lowest border-b border-border-subtle">
+                      <td colSpan={6} className="py-4 px-6">
+                        <div className="bg-white border border-border-subtle p-4 rounded text-sm shadow-sm animate-in fade-in slide-in-from-top-2">
+                           <div className="grid grid-cols-2 gap-4">
+                             <div>
+                               <p className="font-bold text-primary mb-1">Mentee Info</p>
+                               <p className="text-text-muted">ID: {b.user_id}</p>
+                               <p className="text-text-muted">Email: {b.user_email}</p>
+                             </div>
+                             <div>
+                               <p className="font-bold text-primary mb-1">Mentor Info</p>
+                               <p className="text-text-muted">ID: {b.mentor_id}</p>
+                               <p className="text-text-muted">Email: {b.mentor_email}</p>
+                             </div>
+                           </div>
+                           <div className="mt-4 border-t border-border-subtle pt-4">
+                             <p className="font-bold text-primary mb-1">Session Timing (UTC)</p>
+                             <p className="text-text-muted">Start: {new Date(b.start_time).toUTCString()}</p>
+                             <p className="text-text-muted">End: {new Date(b.end_time).toUTCString()}</p>
+                           </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                  </React.Fragment>
                 ))
               )}
             </tbody>
