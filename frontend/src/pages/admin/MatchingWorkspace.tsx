@@ -155,7 +155,14 @@ export function MatchingWorkspace() {
           </div>
           
           <div className="flex-1 overflow-auto bg-surface-container-lowest p-4 space-y-4">
-            {matches.map(m => (
+            {matches.length === 0 ? (
+              <div className="h-full flex flex-col items-center justify-center text-center p-6 text-text-muted">
+                <Search size={32} className="mb-4 text-border-subtle" />
+                <h4 className="font-bold text-primary mb-1">No Matches Found</h4>
+                <p className="text-xs">Try adjusting the requirement tags or checking mentor availability.</p>
+              </div>
+            ) : (
+              matches.map(m => (
               <div 
                 key={m.id} 
                 onClick={() => handleSelectMentor(m)}
@@ -190,8 +197,8 @@ export function MatchingWorkspace() {
                      <span className="text-[11px] font-bold text-primary">4.9 <span className="text-text-muted font-normal">(120)</span></span>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 
@@ -241,16 +248,17 @@ export function MatchingWorkspace() {
           <div className="bg-surface-container-lowest border border-border-subtle rounded-lg p-6 shadow-sm flex items-center justify-between">
              <div>
                 <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest block mb-1">Final Booking Slot</span>
-                <p className="text-sm font-bold text-primary">Monday, October 12th @ 13:00 - 13:45 (GMT-5)</p>
+                <p className="text-sm font-bold text-primary">
+                  {overlapSlots.length > 0 ? 'Selected Slot' : 'No slot selected'}
+                </p>
              </div>
              <button 
-                className="bg-green-600 text-white px-6 py-3 rounded text-sm font-bold shadow-sm hover:bg-green-700 transition-colors"
+                disabled={overlapSlots.length === 0 || !selectedMentor}
+                className="bg-green-600 text-white px-6 py-3 rounded text-sm font-bold shadow-sm hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={() => {
                    if (overlapSlots.length > 0 && selectedMentor) {
                       const s = overlapSlots[0];
                       confirmBooking(selectedMentor.id, s.day_of_week, parseInt(s.start_time.split(':')[0]));
-                   } else {
-                      alert("No mutual overlap selected.");
                    }
                 }}
              >
