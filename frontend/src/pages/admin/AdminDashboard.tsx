@@ -16,14 +16,16 @@ export function AdminDashboard() {
     async function fetchStats() {
       try {
         const [reqsRes, mentorsRes, bookingsRes] = await Promise.all([
-          apiClient.fetch('/requirements').catch(() => ({ requirements: [] })),
+          apiClient.fetch('/requirements?status=pending').catch(() => ({ requirements: [] })),
           apiClient.fetch('/mentors').catch(() => ({ mentors: [] })),
           apiClient.fetch('/bookings/all').catch(() => ({ bookings: [] }))
         ]);
 
+        const activeMentors = mentorsRes.mentors?.filter((m: any) => m.is_active) || [];
+
         setStats({
           requirements: reqsRes.requirements?.length || 0,
-          mentors: mentorsRes.mentors?.length || 0,
+          mentors: activeMentors.length,
           bookings: bookingsRes.bookings?.length || 0
         });
       } catch (e) {

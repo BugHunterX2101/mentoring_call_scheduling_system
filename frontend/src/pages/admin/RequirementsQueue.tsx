@@ -132,13 +132,15 @@ export function RequirementsQueue() {
                     className="w-4 h-4 rounded border-border-subtle text-primary focus:ring-primary cursor-pointer" 
                   />
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-surface-container-high rounded text-primary flex items-center justify-center font-bold text-sm border border-border-subtle">
-                       {req.user_name.split(' ').map((n:string) => n[0]).join('').substring(0, 2).toUpperCase()}
-                    </div>
+                    <img 
+                      src={`https://ui-avatars.com/api/?name=${req.user_name}&background=random`} 
+                      alt={req.user_name} 
+                      className="w-10 h-10 rounded object-cover" 
+                    />
                     <div>
                       <h4 className="text-sm font-bold text-primary">{req.user_name}</h4>
                       <p className="text-[10px] font-mono text-text-muted uppercase tracking-widest mt-0.5">
-                         {req.user_tags && req.user_tags.length > 0 ? req.user_tags[0] : 'Mentee'}
+                         Mentee
                       </p>
                     </div>
                   </div>
@@ -162,13 +164,16 @@ export function RequirementsQueue() {
                   <div className="text-xs mb-1">
                     <span className="text-text-muted mr-2">Urgency:</span>
                     <span className="font-bold text-primary">
-                      {req.id % 3 === 0 ? 'High (Today)' : req.id % 3 === 1 ? 'Low' : 'Medium (Next 48h)'}
+                      {req.created_at ? (
+                        new Date().getTime() - new Date(req.created_at).getTime() < 48 * 60 * 60 * 1000 
+                          ? 'High' : 'Medium'
+                      ) : 'Medium'}
                     </span>
                   </div>
                   <div className="text-xs">
-                    <span className="text-text-muted mr-2">Language:</span>
+                    <span className="text-text-muted mr-2">Date:</span>
                     <span className="font-bold text-primary">
-                      {req.id % 4 === 0 ? 'English, Spanish' : req.id % 4 === 1 ? 'English, Mandarin' : req.id % 4 === 2 ? 'English, Portuguese' : 'English'}
+                      {req.created_at ? new Date(req.created_at).toLocaleDateString() : 'N/A'}
                     </span>
                   </div>
                 </div>

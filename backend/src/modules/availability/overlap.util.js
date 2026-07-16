@@ -10,12 +10,17 @@ function calculateOverlap(userSlots, mentorSlots) {
         const end = us.end_time < ms.end_time ? us.end_time : ms.end_time;
         
         if (start < end) {
-          overlap.push({
-            day_of_week: us.day_of_week,
-            start_time: start,
-            end_time: end,
-            timezone: us.timezone // Assuming same timezone for v1 simplified overlap
-          });
+          const startHour = parseInt(start.split(':')[0], 10);
+          const endHour = parseInt(end.split(':')[0], 10);
+          
+          for (let hour = startHour; hour < endHour; hour++) {
+            overlap.push({
+              day_of_week: us.day_of_week,
+              start_time: `${hour.toString().padStart(2, '0')}:00:00`,
+              end_time: `${(hour + 1).toString().padStart(2, '0')}:00:00`,
+              timezone: us.timezone
+            });
+          }
         }
       }
     }

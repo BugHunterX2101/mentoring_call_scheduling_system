@@ -149,7 +149,7 @@ export function MentorDirectory() {
                     <span className="text-xs font-bold text-blue-500 uppercase tracking-wider">AI Profile Rationale</span>
                   </div>
                   <p className="text-sm text-primary">
-                    {featuredMentor.ai_rationale || "High-availability systems specialist. Excellent technical fit."}
+                    {featuredMentor.ai_rationale || "General mentor profile. Good technical fit for various standard requests."}
                   </p>
                 </div>
               </div>
@@ -162,8 +162,8 @@ export function MentorDirectory() {
                  <h3 className="text-xl font-bold">Matching Efficiency</h3>
                </div>
                <div className="mt-8">
-                 <div className="text-5xl font-bold mb-2">{featuredMentor?.network_health || 94}%</div>
-                 <p className="text-sm text-text-muted">Avg. satisfaction score for directory-led matches this month.</p>
+                 <div className="text-5xl font-bold mb-2">{featuredMentor?.network_health || 'N/A'}%</div>
+                 <p className="text-sm text-text-muted">Based on overlapping demand metrics.</p>
                </div>
             </div>
           </div>
@@ -214,7 +214,7 @@ export function MentorDirectory() {
                     </div>
                   ) : (
                     <p className="text-sm text-text-muted italic mb-6 line-clamp-2">
-                      "{m.description || "Focused on high-fidelity prototyping and stakeholder management..."}"
+                      {m.description ? `"${m.description}"` : "No description provided."}
                     </p>
                   )}
                 </div>

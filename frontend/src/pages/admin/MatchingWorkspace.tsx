@@ -19,32 +19,16 @@ export function MatchingWorkspace() {
   const [loadingOverlap, setLoadingOverlap] = useState(false);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | null>(null);
 
-  useEffect(() => {
-    // Fetch requirement and automatically run matches
-    apiClient.fetch(`/requirements/${id}`)
-      .then(data => {
-        setRequirement(data);
-        return apiClient.fetch(`/recommendations/${id}`, { method: 'POST' });
-      })
-      .then(result => {
-        setMatches(result.matches);
-        if (result.matches.length > 0) {
-          handleSelectMentor(result.matches[0]);
-        }
-      })
-      .catch(console.error)
-      .finally(() => setLoadingReq(false));
-  }, [id]);
-
-  const handleSelectMentor = async (mentor: any) => {
+  const handleSelectMentor = async (mentor: any, reqOverride?: any) => {
     setSelectedMentor(mentor);
     setLoadingOverlap(true);
     setSelectedTimeSlot(null);
+    const targetReq = reqOverride || requirement;
     try {
-      const res = await apiClient.fetch(`/availability/overlap?userId=${requirement?.user_id || ''}&mentorId=${mentor.id}`);
+      const res = await apiClient.fetch(`/availability/overlap?userId=${targetReq?.user_id || ''}&mentorId=${mentor.id}`);
       if (res.overlap) {
         setOverlapSlots(res.overlap.map((s: any) => ({
-          day_of_week: s.day_of_week,
+          day_of_week: parseInt(s.day_of_week, 10),
           start_time: s.start_time,
           end_time: s.end_time,
           type: 'overlap'
@@ -56,6 +40,24 @@ export function MatchingWorkspace() {
       setLoadingOverlap(false);
     }
   };
+
+  useEffect(() => {
+    // Fetch requirement and automatically run matches
+    apiClient.fetch(`/requirements/${id}`)
+      .then(data => {
+        setRequirement(data);
+        return apiClient.fetch(`/recommendations/${id}`, { method: 'POST' })
+          .then(result => ({ data, result }));
+      })
+      .then(({ data, result }) => {
+        setMatches(result.matches);
+        if (result.matches.length > 0) {
+          handleSelectMentor(result.matches[0], data);
+        }
+      })
+      .catch(console.error)
+      .finally(() => setLoadingReq(false));
+  }, [id]);
 
   const confirmBooking = async () => {
     if (!selectedMentor || !selectedTimeSlot) return;
@@ -116,42 +118,48 @@ export function MatchingWorkspace() {
           
           <div className="flex flex-col gap-2 mb-8 pb-8 border-b border-border-subtle">
             <div className="flex flex-wrap gap-2">
-              <span className="px-2 py-1 bg-surface-container-low text-[10px] font-bold text-text-muted uppercase tracking-widest rounded-sm">RESUME REVAMP</span>
-              <span className="px-2 py-1 bg-surface-container-low text-[10px] font-bold text-text-muted uppercase tracking-widest rounded-sm">TECH INDUSTRY</span>
+              {requirement.user_tags && requirement.user_tags.length > 0 ? (
+                requirement.user_tags.map((tag: string) => (
+                  <span key={tag} className="px-2 py-1 bg-surface-container-low text-[10px] font-bold text-text-muted uppercase tracking-widest rounded-sm">
+                    {tag}
+                  </span>
+                ))
+              ) : (
+                <span className="px-2 py-1 bg-surface-container-low text-[10px] font-bold text-text-muted uppercase tracking-widest rounded-sm">No Tags</span>
+              )}
             </div>
           </div>
           
           <div className="mb-6">
             <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-2 block">Request Subject</span>
-            <h4 className="text-sm text-primary mb-6">Resume Revamp for Career Pivot</h4>
+            <h4 className="text-sm text-primary mb-6">{requirement.call_type?.replace(/_/g, ' ') || 'Mentoring Session'}</h4>
             
             <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-2 block">Call Type</span>
             <div className="flex items-center gap-2 mb-6">
                <Video size={16} className="text-primary" />
-               <span className="text-sm text-primary">1-on-1 Video Session (45m)</span>
+               <span className="text-sm text-primary">{requirement.call_type?.replace(/_/g, ' ') || '1-on-1 Video Session'}</span>
             </div>
           </div>
           
           <div className="mb-6">
             <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-2 block">Description</span>
             <p className="text-xs text-text-muted leading-relaxed">
-              {requirement.description || "Looking to transition from Marketing Operations to Product Management. Needs a mentor with experience in top-tier tech firms who can review current resume and provide strategic structural feedback."}
+              {requirement.description || "No description provided by the mentee."}
             </p>
           </div>
           
           <div className="mb-6">
             <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-2 block">Preferred Timeline</span>
-            <p className="text-sm text-blue-500">As soon as possible / Within 5 days</p>
+            <p className="text-sm text-blue-500">
+              {requirement.created_at ? (
+                new Date().getTime() - new Date(requirement.created_at).getTime() < 48 * 60 * 60 * 1000 
+                  ? 'High Priority (Requested recently)' : 'Standard Priority'
+              ) : 'As soon as possible'}
+            </p>
           </div>
           
-          <div className="border border-border-subtle rounded-sm p-4 relative mt-8">
-            <div className="flex items-center gap-2 mb-2">
-              <UserCircle size={14} className="text-blue-500" />
-              <span className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">Admin Note</span>
-            </div>
-            <p className="text-xs text-primary leading-relaxed italic">
-              Focus on mentors who have successfully pivoted or managed pivoters.
-            </p>
+          <div className="mb-6">
+            {/* Admin notes removed for cleaner interface as it was a placeholder */}
           </div>
         </div>
 
@@ -186,7 +194,7 @@ export function MatchingWorkspace() {
                     <img src={`https://ui-avatars.com/api/?name=${m.name}&background=random`} alt={m.name} className="w-10 h-10 rounded-sm object-cover" />
                     <div>
                       <h4 className="font-bold text-primary text-sm">{m.name}</h4>
-                      <p className="text-[11px] text-text-muted mt-0.5">{m.description || 'Senior PM @ Google'}</p>
+                      <p className="text-[11px] text-text-muted mt-0.5 truncate max-w-[150px]">{m.description || 'Mentor'}</p>
                     </div>
                   </div>
                   <span className={`text-[10px] font-bold px-2 py-1 rounded-sm uppercase tracking-widest ${m.fit_score >= 90 ? 'bg-green-100 text-green-700' : 'bg-surface-container-low text-text-muted'}`}>
@@ -204,12 +212,10 @@ export function MatchingWorkspace() {
                 
                 <div className="flex items-center justify-start gap-6 pt-2">
                   <div className="flex items-center gap-1.5">
-                     <Calendar size={12} className="text-text-muted" />
-                     <span className="text-[10px] font-bold text-text-muted tracking-widest uppercase">12 Slots</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
                      <span className="text-text-muted text-xs">☆</span>
-                     <span className="text-[10px] font-bold text-text-muted tracking-widest">4.9 (120)</span>
+                     <span className="text-[10px] font-bold text-text-muted tracking-widest">
+                       {m.rating_avg ? `${parseFloat(m.rating_avg).toFixed(1)} (${m.rating_count || 0})` : 'New'}
+                     </span>
                   </div>
                 </div>
               </div>
