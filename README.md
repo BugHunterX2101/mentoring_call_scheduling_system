@@ -1,339 +1,755 @@
 <div align="center">
 
-<img src="https://img.shields.io/badge/Mentoring%20Call%20Scheduler-2B579A?style=for-the-badge&logo=react&logoColor=white" alt="Mentoring Call Scheduling System" />
+<br/>
 
-<h1>Mentoring Call Scheduling System</h1>
-<p><strong>An intelligent, real-time matchmaking and scheduling platform for industry mentorship</strong></p>
-<p>Built with Node.js Â· React 18 Â· TypeScript Â· PostgreSQL Â· Tailwind CSS Â· Groq AI (LLaMA 3)</p>
+<img src="https://img.shields.io/badge/Mentorque-AI%20Scheduling%20Platform-4F46E5?style=for-the-badge&logo=lightning&logoColor=white" alt="Mentorque" height="38"/>
+
+<h1>Mentorque</h1>
+<p><strong>An intelligent, AI-powered mentoring and scheduling platform — built for the modern enterprise</strong></p>
+
+<p>
+  <img src="https://img.shields.io/badge/Node.js-20-339933?style=flat-square&logo=nodedotjs&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Express.js-4.x-000000?style=flat-square&logo=express&logoColor=white"/>
+  <img src="https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=black"/>
+  <img src="https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white"/>
+  <img src="https://img.shields.io/badge/PostgreSQL-15-4169E1?style=flat-square&logo=postgresql&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Groq_AI-LLaMA_3.1-F55036?style=flat-square&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Tailwind_CSS-3-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Vite-5-646CFF?style=flat-square&logo=vite&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Deployed%20on-Vercel-000000?style=flat-square&logo=vercel&logoColor=white"/>
+</p>
+
+<p>
+  <a href="#-quick-start"><strong>Quick Start</strong></a> ·
+  <a href="#%EF%B8%8F-architecture"><strong>Architecture</strong></a> ·
+  <a href="#-features"><strong>Features</strong></a> ·
+  <a href="#-file-structure"><strong>File Structure</strong></a> ·
+  <a href="#-deployment-vercel"><strong>Deploy</strong></a>
+</p>
 
 <br/>
 
-[![Frontend App](https://img.shields.io/badge/Frontend-React_18-61DAFB?style=for-the-badge)](#)
-[![Backend API](https://img.shields.io/badge/API_Docs-Express.js-000000?style=for-the-badge)](#)
+> **Mentorque** eliminates scheduling friction between junior talent and senior industry experts through AI-driven matchmaking, real-time availability grids, and a zero-friction booking workflow — all in one coherent platform.
 
 <br/>
-
-![Node.js](https://img.shields.io/badge/Node.js-20-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
-![Express.js](https://img.shields.io/badge/Express.js-4.x-000000?style=for-the-badge&logo=express&logoColor=white)
-![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
-![Groq](https://img.shields.io/badge/Groq-AI-F55036?style=for-the-badge&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
 
 </div>
 
 ---
 
-## Executive Summary
+## ? What Is Mentorque?
 
-This project delivers a **fully functional, AI-powered mentoring and scheduling platform** designed to eliminate the friction of pairing junior talent with senior industry experts. It is built as a complete full-stack application, prioritizing seamless UX, automated matchmaking, and a robust data model.
+Mentorque is a **full-stack, production-ready** mentoring platform that automates the entire lifecycle of a mentoring engagement — from a mentee posting their first request, to an AI ranking the best mentor matches, to an admin locking in a confirmed session slot. It is built around three distinct role-based consoles with real-time state and a shared PostgreSQL backend.
 
-- **Intelligent Matchmaking**: Integrates with Groq AI (LLaMA 3.1) to analyze mentee requirements, rank the most qualified mentors, and generate natural language rationales for the match. Features a robust fallback engine that ensures seamless scheduling even during strict tag mismatches or API timeouts.
-- **Advanced Scheduling Engine**: Features a bespoke React-based TimeGrid for managing complex availability schedules, mathematically ensuring overlap precision.
-- **Role-Based Architecture**: Distinct, real-time dashboards for Mentees, Mentors, and Platform Administrators powered by an Express.js and PostgreSQL backend.
-- **Enterprise UI/UX**: High-fidelity interfaces utilizing Tailwind CSS, offering optimistic UI updates, strict client-to-server payload mapping, and interactive data filtering out-of-the-box.
+### The Three Consoles
+
+| Role | Console | Primary Capability |
+|---|---|---|
+| ?? **Mentee** | Mentee Console | Submit requirements, set recurring weekly availability, track bookings |
+| ?? **Mentor** | Mentor Console | Manage availability schedule, view confirmed upcoming sessions |
+| ??? **Admin** | Admin Console | Review requirements queue, run AI batch matching, confirm session bookings |
 
 ---
 
-## System Architecture
+## ??? Architecture
 
-### High-Level Topology
+### High-Level System Topology
 
 ```mermaid
 graph TD
-    Browser["Browser Client (React/Vite)"]
-
-    subgraph Backend ["Node.js Express Backend"]
-        Auth["Auth Router\n(JWT Middleware)"]
-        Mentors["Mentors Router\n(Directory & Status)"]
-        Reqs["Requirements Router\n(Batch Matching)"]
-        Bookings["Bookings Router\n(Overlap & Scheduling)"]
-        AI["Recommendations Router\n(LLM Integration)"]
+    subgraph Client ["Browser Client"]
+        UI["React 18 + TypeScript SPA\n(Vite Dev Server / Vercel Static)"]
+        RC["Role Guard + Auth Context\n(JWT in localStorage)"]
+        UI --> RC
     end
 
-    subgraph Database ["PostgreSQL"]
-        DB[(Relational Tables)]
-    end
-    
-    subgraph External ["External Services"]
-        Groq["Groq API (LLaMA)"]
+    subgraph API ["Express.js REST API (Node.js 20)"]
+        direction TB
+        MW["Auth Middleware\n(JWT Verification + RBAC)"]
+        AuthR["POST /auth/login\nPOST /auth/signup\nGET /auth/me"]
+        AvailR["GET/PUT /availability/me\nGET /availability/overlap"]
+        ReqR["GET/POST /requirements\nPATCH /:id/status\nPOST /batch-match"]
+        MentorR["GET /mentors\nPATCH /mentors/:id"]
+        RecR["POST /recommendations/:reqId\nGET /recommendations/summary"]
+        BookR["GET /bookings/me\nGET /bookings/all\nPOST /bookings\nDELETE /bookings/:id"]
+        SetR["GET/PATCH /settings\nPOST /settings/backup"]
+
+        MW --> AuthR
+        MW --> AvailR
+        MW --> ReqR
+        MW --> MentorR
+        MW --> RecR
+        MW --> BookR
+        MW --> SetR
     end
 
-    Browser -->|REST API| Auth
-    Browser -->|REST API| Mentors
-    Browser -->|REST API| Reqs
-    Browser -->|REST API| Bookings
-    Browser -->|REST API| AI
-    
-    Auth --> DB
-    Mentors --> DB
-    Reqs --> DB
-    Bookings --> DB
-    AI --> DB
-    
-    AI <-->|Prompt Generation| Groq
+    subgraph DB ["PostgreSQL 15"]
+        Users[("users")]
+        Profiles[("user_profiles\nmentor_profiles")]
+        Avail[("availability")]
+        Reqs[("requirements")]
+        Recs[("recommendations")]
+        Books[("bookings")]
+        Settings[("settings")]
+    end
+
+    subgraph External ["External AI"]
+        Groq["Groq Cloud API\n(LLaMA-3.1-8b-instant)"]
+    end
+
+    RC -- "REST / JSON" --> MW
+    AuthR --> Users
+    AvailR --> Avail
+    ReqR --> Reqs
+    MentorR --> Profiles
+    RecR --> Recs
+    BookR --> Books
+    SetR --> Settings
+    RecR <--> Groq
 ```
 
-### Database Schema (ERD)
+---
+
+### Database Schema (Entity-Relationship Diagram)
 
 ```mermaid
 erDiagram
     USERS {
-        int id PK
-        string name
-        string email UK
-        string hashed_password
-        string role "admin, user, mentor"
+        uuid id PK
+        varchar name
+        varchar email UK
+        varchar hashed_password
+        varchar role "admin or user or mentor"
+        timestamp created_at
     }
-    
+
     USER_PROFILES {
-        int id PK
-        int user_id FK
-        string tags "JSON Array"
+        uuid id PK
+        uuid user_id FK
+        jsonb tags
+        text bio
     }
-    
+
     MENTOR_PROFILES {
-        int id PK
-        int user_id FK
-        string quote
-        string ai_rationale
+        uuid id PK
+        uuid user_id FK
+        text description
+        jsonb tags
+        text ai_rationale
         int network_health
         boolean is_active
+        numeric rating_avg
+        int rating_count
     }
-    
+
     REQUIREMENTS {
-        int id PK
-        int user_id FK
-        string call_type
-        string description
-        string status "pending, matched, booked"
+        uuid id PK
+        uuid user_id FK
+        uuid assigned_mentor_id FK
+        varchar call_type
+        text description
+        varchar status "pending or matched or booked or rejected"
+        timestamp created_at
     }
-    
+
     AVAILABILITY {
-        int id PK
-        int owner_id FK
-        int day_of_week
+        uuid id PK
+        uuid owner_id FK
+        int day_of_week "0=Sun to 6=Sat"
         time start_time
         time end_time
-    }
-    
-    BOOKINGS {
-        int id PK
-        int requirement_id FK
-        int user_id FK
-        int mentor_id FK
-        datetime start_time
-        datetime end_time
-    }
-    
-    RECOMMENDATIONS {
-        int id PK
-        int requirement_id FK
-        int mentor_id FK
-        int fit_score
-        string rationale
+        varchar timezone
+        boolean is_recurring
     }
 
-    USERS ||--o{ USER_PROFILES : "has"
-    USERS ||--o{ MENTOR_PROFILES : "has"
+    BOOKINGS {
+        uuid id PK
+        uuid requirement_id FK
+        uuid user_id FK
+        uuid mentor_id FK
+        uuid admin_id FK
+        timestamp start_time
+        timestamp end_time
+        varchar status
+    }
+
+    RECOMMENDATIONS {
+        uuid id PK
+        uuid requirement_id FK
+        uuid mentor_id FK
+        int fit_score "0-100"
+        text rationale
+        timestamp created_at
+    }
+
+    SETTINGS {
+        uuid id PK
+        varchar key UK
+        text value
+        timestamp updated_at
+    }
+
+    USERS ||--o| USER_PROFILES : "has profile"
+    USERS ||--o| MENTOR_PROFILES : "has mentor profile"
     USERS ||--o{ REQUIREMENTS : "submits"
-    USERS ||--o{ AVAILABILITY : "sets"
+    USERS ||--o{ AVAILABILITY : "defines"
     USERS ||--o{ BOOKINGS : "participates in"
-    
     REQUIREMENTS ||--o{ RECOMMENDATIONS : "generates"
     REQUIREMENTS ||--o| BOOKINGS : "results in"
+    MENTOR_PROFILES ||--o{ RECOMMENDATIONS : "appears in"
 ```
 
-### Request Flow: Core Booking & AI Matching
+---
+
+### Core Booking & AI Matching — Sequence Flow
 
 ```mermaid
 sequenceDiagram
-    participant Mentee
-    participant Admin
-    participant System
-    participant GroqAI
-    
-    Mentee->>System: Submit Requirement (Call Type, Description)
-    Mentee->>System: Update Weekly Availability
-    
-    Admin->>System: Select Pending Requirements & Run Batch Match
-    System->>GroqAI: Send Requirement + Mentor Pool
-    GroqAI-->>System: Return Ranked List & Rationales
-    System->>System: Save Recommendations
-    
-    Admin->>System: Open Matching Workspace
-    System-->>Admin: Display AI Rationale & Mutual Overlap Grid
-    Admin->>System: Select Time Slot & Confirm Booking
-    System->>System: Finalize Booking & Remove Used Slots
+    autonumber
+    actor Mentee
+    actor Admin
+    participant Frontend as React Frontend
+    participant API as Express API
+    participant Groq as Groq AI (LLaMA 3.1)
+    participant DB as PostgreSQL
+
+    Mentee->>Frontend: Fill requirement form (call type, description, tags)
+    Frontend->>API: POST /requirements
+    API->>DB: INSERT requirements (status=pending)
+    API-->>Frontend: 201 Created
+
+    Mentee->>Frontend: Click slots on TimeGrid
+    Frontend->>API: PUT /availability/me
+    API->>DB: DELETE old slots, INSERT new slots
+    API-->>Frontend: 200 OK
+
+    Admin->>Frontend: Open Requirements Queue
+    Frontend->>API: GET /requirements?status=pending
+    API->>DB: SELECT pending requirements
+    API-->>Frontend: list of requirements
+
+    Admin->>Frontend: Select requirements, Run Batch Match
+    Frontend->>API: POST /requirements/batch-match
+
+    loop For each requirement ID
+        API->>DB: SELECT mentor pool + availability
+        API->>Groq: Chat completion — rank mentors by fit score
+        Groq-->>API: JSON ranked list with rationale
+        API->>DB: UPDATE requirement status=matched
+        API->>DB: INSERT recommendations
+    end
+
+    API-->>Frontend: batch match complete
+
+    Admin->>Frontend: Click Find Match on a requirement
+    Frontend->>API: POST /recommendations/:reqId
+    API->>DB: SELECT overlap(user_avail, mentor_avail)
+    API-->>Frontend: matches + overlap slots
+
+    Admin->>Frontend: Select overlap slot, Confirm Booking
+    Frontend->>API: POST /bookings
+    API->>DB: BEGIN TRANSACTION
+    API->>DB: INSERT bookings
+    API->>DB: UPDATE requirements status=booked
+    API->>DB: DELETE used availability slots
+    API->>DB: COMMIT
+    API-->>Frontend: booking confirmed
+    Frontend-->>Admin: Navigate to Requirements Queue
 ```
 
 ---
 
-## Core Capabilities
+### Frontend Component Architecture
 
-### Administrative Tools & Matchmaking
+```mermaid
+graph TD
+    App["App.tsx"]
+    Router["AppRoutes (BrowserRouter)"]
+    AuthCtx["AuthContext\n(JWT, User, Profile)"]
+    RoleGuard["RoleGuard\n(role-based redirect)"]
 
-| Feature | Details |
-|---|---|
-| AI-Powered Matching | Evaluates mentor pools against mentee needs using Groq's LLaMA 3.1, returning a ranked fit score and customized rationale. |
-| Batch Processing | Multi-select interface in the Requirements Queue to trigger background matching for dozens of mentees simultaneously using the LLaMA 3.1 LLM pipeline. |
-| Complete Lifecycle Management | Cancel or reject requirements and bookings from any dashboard (Mentee, Mentor, Admin), with automatic status restoration for re-matching. |
-| Overlap Analysis | Visual TimeGrid explicitly highlights mutual availability overlaps between a mentee and a selected mentor in real-time. |
-| Mentor Directory | Real-time directory with Quick Filters (FAANG, Active Only) and instant state toggling for mentor availability. |
-| Platform Settings & Backups | A fully dynamic settings configuration console backed by PostgreSQL, allowing admins to toggle algorithm flags and generate local `.sql` database dumps with a click. |
-| Dynamic Database UI | 100% dynamic UI configuration elements, such as Mentee Request form categories fetching from active DB tables (`call_types`). |
-| Secure Authentication | Real-time dynamic Sign Up and Login flow with secure bcrypt password hashing and token-based RBAC session generation. |
-| Strict Form Validation | Blocks disposable email domains and enforces strict password length/strength policies directly connected between frontend and backend pipelines. |
+    App --> Router
+    Router --> AuthCtx
+    AuthCtx --> RoleGuard
 
-### Mentee & Mentor Workflows
+    subgraph Public ["Public Pages"]
+        Login["Login.tsx"]
+        Signup["Signup.tsx"]
+    end
 
-| Feature | Details |
-|---|---|
-| Dynamic Tags | Mentees can submit free-form tags and requirements directly into the system to guide the AI matchmaker. |
-| Live Performance Metrics | Mentors see a dynamically calculated Compatibility Score, built by running live overlap analysis against all pending mentee requests in the database to determine active mentor demand. |
-| Real-Time Dashboard | Mentees receive live AI feedback banners indicating the number of mentors in the network matching their exact timezone/needs. |
-| Confirmed Sessions | Mentors see a live-updating sidebar of confirmed upcoming calls mapped exactly to their availability inputs. |
-| UI State Polish | Smooth inline UI state transitions (e.g. "âœ“ Saved!" buttons) providing satisfying micro-interactions without intrusive browser alerts. |
-| Dynamic TimeGrid | Advanced React-based weekly scheduling grid featuring dynamic date rendering, active week navigation (Next/Last week mapping), and drag-to-select functionality. |
+    subgraph MenteePages ["Mentee Console"]
+        MD["MenteeDashboard.tsx\nAvailability, Requirements, Bookings"]
+    end
+
+    subgraph MentorPages ["Mentor Console"]
+        MentorD["MentorDashboard.tsx\nAvailability, Confirmed Calls"]
+    end
+
+    subgraph AdminPages ["Admin Console"]
+        ADash["AdminDashboard.tsx"]
+        RQ["RequirementsQueue.tsx"]
+        MW["MatchingWorkspace.tsx"]
+        MDir["MentorDirectory.tsx"]
+        AB["AdminBookings.tsx"]
+        AS["AdminSettings.tsx"]
+    end
+
+    subgraph Shared ["Shared Components"]
+        DL["DashboardLayout.tsx"]
+        SN["SideNav.tsx"]
+        TG["TimeGrid.tsx"]
+        SB["StatusBadge.tsx"]
+        TP["TagPill.tsx"]
+    end
+
+    RoleGuard --> Login
+    RoleGuard --> Signup
+    RoleGuard --> MD
+    RoleGuard --> MentorD
+    RoleGuard --> ADash
+    RoleGuard --> RQ
+    RoleGuard --> MW
+    RoleGuard --> MDir
+    RoleGuard --> AB
+    RoleGuard --> AS
+
+    MD --> DL
+    MentorD --> DL
+    ADash --> DL
+    DL --> SN
+    MD --> TG
+    MentorD --> TG
+    MW --> TG
+```
 
 ---
 
-## Technology Stack
+### AI Matching Engine — Internal Logic
 
-| Domain | Technology | Implementation Details |
-|---|---|---|
-| **Frontend Framework** | React 18 / Vite | Handles component rendering, routing, and fast local development. |
-| **Styling** | Tailwind CSS | Custom utility classes tailored to replicate enterprise SaaS design tokens. |
-| **Backend Framework** | Node.js + Express.js | High-performance RESTful API architecture. |
-| **Database** | PostgreSQL | Robust relational storage with the pg client wrapper. |
-| **Artificial Intelligence** | Groq SDK | Integrates LLaMA-3.1-8b-instant for blazing-fast, JSON-structured output ranking. |
-| **Security** | bcrypt & JWT | Industry-standard password hashing and secure token-based session generation. |
+```mermaid
+flowchart TD
+    Start(["Admin triggers matching for requirement ID"])
+    FetchMentors["Fetch active mentor pool from mentor_profiles"]
+    FetchAvail["Fetch mentee and mentor availability slots"]
+    CalcOverlap["Calculate overlap days using overlap.util.js"]
+    HasOverlap{Overlapping slots found?}
+    BuildPrompt["Build structured prompt:\ncall type + description\nmentee tags\nmentor pool name, tags, description\noverlap windows"]
+    GroqAPI["Send to Groq API\n(LLaMA-3.1-8b-instant)\nJSON mode output"]
+    ParseJSON["Parse AI response:\nid, fit_score, rationale"]
+    ValidJSON{Valid JSON array?}
+    Fallback["Fallback: Tag-match scoring\ncount matching tags divided by max_tags times 100"]
+    Sort["Sort by fit_score DESC"]
+    Save["INSERT recommendations\nrequirement_id, mentor_id, fit_score, rationale"]
+    Return(["Return ranked matches to Admin Workspace"])
+
+    Start --> FetchMentors
+    FetchMentors --> FetchAvail
+    FetchAvail --> CalcOverlap
+    CalcOverlap --> HasOverlap
+    HasOverlap -- Yes --> BuildPrompt
+    HasOverlap -- No --> Fallback
+    BuildPrompt --> GroqAPI
+    GroqAPI --> ParseJSON
+    ParseJSON --> ValidJSON
+    ValidJSON -- Yes --> Sort
+    ValidJSON -- No --> Fallback
+    Fallback --> Sort
+    Sort --> Save
+    Save --> Return
+```
 
 ---
 
-## Local Development Guide
+## ?? Features
 
-### System Requirements
+### ??? Admin Workspace
 
-- Node.js 18 or higher
-- PostgreSQL 15 or higher
+| Feature | Description |
+|---|---|
+| **AI Batch Matching** | Multi-select pending requirements and trigger LLaMA 3.1 ranking against the entire active mentor pool in one click |
+| **Matching Workspace** | Full 3-panel interface: Mentee details, Ranked mentor list with AI rationale, Real-time overlap TimeGrid |
+| **Requirements Queue** | Filterable, paginated queue with inline expansion, batch selection, and instant reject/accept actions |
+| **Mentor Directory** | Real-time directory with FAANG/Active filters, inline Quick Edit for tags & bio, and live active toggle |
+| **Booking Management** | Full-view table of all confirmed sessions across the platform, with one-click CSV export |
+| **Platform Settings** | Persistent settings console: toggle auto-matching, configure AI sensitivity, set timezone, trigger DB backup |
 
-### 1. Repository Initialization
+### ?? Mentee Console
+
+| Feature | Description |
+|---|---|
+| **Requirement Submission** | Submit call type, description, and skill tags — directly queued for admin matching |
+| **Weekly Availability Grid** | Click-to-select recurring weekly time slots (Mon–Fri, 09:00–16:00) with week navigation |
+| **Live AI Match Helper** | Sidebar widget showing real-time count of mentors matching timezone and skill tags |
+| **Booking History** | Full-width table with upcoming vs past session distinction, status badges, and cancel-only-future logic |
+
+### ?? Mentor Console
+
+| Feature | Description |
+|---|---|
+| **Recurring Availability** | Set and update weekly schedule with the interactive TimeGrid — past weeks are read-only |
+| **Confirmed Sessions** | Full-width data table showing all booked calls, upcoming/past labels, and cancel option |
+| **Match Performance Card** | Live compatibility score dynamically calculated from the mentor pool against pending demand |
+
+---
+
+## ?? Technology Stack
+
+| Layer | Technology | Version | Purpose |
+|---|---|---|---|
+| **UI Framework** | React | 18 | Component-based SPA rendering |
+| **Language** | TypeScript | 5 | End-to-end type safety |
+| **Build Tool** | Vite | 5 | Sub-second HMR, optimized production bundles |
+| **Styling** | Tailwind CSS | 3 | Utility-first with custom design tokens |
+| **Routing** | React Router | 6 | Client-side navigation with role guards |
+| **Backend** | Node.js + Express.js | 20 / 4.x | RESTful API with middleware pipeline |
+| **Database** | PostgreSQL | 15 | Relational storage with transactional booking logic |
+| **ORM/Driver** | `pg` (node-postgres) | latest | Direct SQL with parameterized inputs |
+| **AI Engine** | Groq SDK + LLaMA 3.1 | 3.1-8b-instant | Fast JSON-structured mentor ranking |
+| **Auth** | bcrypt + JWT | — | Password hashing + stateless token sessions |
+| **Deployment** | Vercel | v2 | Monorepo: Static frontend + Serverless backend |
+
+---
+
+## ?? File Structure
+
+```
+mentoring_call_scheduling_system/
+¦
++-- vercel.json                       # Monorepo build & routing config
++-- README.md
+¦
++-- backend/
+¦   +-- package.json
+¦   +-- .env                          # PORT, DATABASE_URL, JWT_SECRET, GROQ_API_KEY
+¦   +-- fixPasswords.js               # One-time bcrypt migration utility
+¦   ¦
+¦   +-- src/
+¦       +-- server.js                 # HTTP server entry point
+¦       +-- app.js                    # Express app: CORS, JSON, route mounting
+¦       ¦
+¦       +-- config/
+¦       ¦   +-- db.js                 # PostgreSQL pool (node-postgres)
+¦       ¦   +-- schema.sql            # Table definitions
+¦       ¦   +-- seed.js               # Demo data seeder
+¦       ¦   +-- seedNames.js          # Name arrays for seed generation
+¦       ¦
+¦       +-- middleware/
+¦       ¦   +-- auth.middleware.js    # JWT verification ? req.user injection
+¦       ¦   +-- rbac.middleware.js    # Role-based access control factory
+¦       ¦
+¦       +-- modules/
+¦           +-- auth/
+¦           ¦   +-- auth.routes.js    # POST /login · POST /signup · GET /me
+¦           ¦
+¦           +-- availability/
+¦           ¦   +-- availability.routes.js   # GET|PUT /me · GET /overlap
+¦           ¦   +-- overlap.util.js          # Pure function: slot intersection logic
+¦           ¦
+¦           +-- bookings/
+¦           ¦   +-- bookings.routes.js       # GET /me · GET /all · POST / · DELETE /:id
+¦           ¦
+¦           +-- mentors/
+¦           ¦   +-- mentors.routes.js        # GET / · PATCH /:id · GET /me/performance
+¦           ¦
+¦           +-- recommendations/
+¦           ¦   +-- recommendations.routes.js  # POST /:reqId · GET /summary
+¦           ¦   +-- groqService.js             # Prompt builder + Groq API + fallback scorer
+¦           ¦
+¦           +-- requirements/
+¦           ¦   +-- requirements.routes.js  # Full CRUD + batch-match endpoint
+¦           ¦
+¦           +-- settings/
+¦               +-- settings.routes.js  # GET / · PATCH / · POST /backup · POST /clear-cache
+¦
++-- frontend/
+    +-- package.json
+    +-- .env                           # VITE_API_URL=http://localhost:5000/api
+    +-- tailwind.config.js             # Custom tokens: primary, text-muted, border-subtle
+    +-- vite.config.ts
+    +-- tsconfig.json
+    ¦
+    +-- src/
+        +-- main.tsx                   # React root (ReactDOM.createRoot)
+        +-- App.tsx                    # Renders <AppRoutes />
+        +-- index.css                  # Tailwind directives
+        ¦
+        +-- app/
+        ¦   +-- routes.tsx             # BrowserRouter + all route definitions + catch-all
+        ¦   +-- RoleGuard.tsx          # HOC: redirect by role if unauthorized
+        ¦
+        +-- lib/
+        ¦   +-- api/
+        ¦   ¦   +-- client.ts          # Fetch wrapper: auto-injects JWT, throws on error
+        ¦   +-- auth/
+        ¦       +-- AuthContext.tsx    # createContext: user, profile, login(), logout()
+        ¦
+        +-- components/
+        ¦   +-- layout/
+        ¦   ¦   +-- DashboardLayout.tsx  # Sidebar + topbar shell for all console pages
+        ¦   ¦   +-- SideNav.tsx          # Role-aware nav links + logout redirect
+        ¦   ¦
+        ¦   +-- ui/
+        ¦       +-- TimeGrid.tsx       # Weekly availability grid (click-to-select, week nav)
+        ¦       +-- StatusBadge.tsx    # Colored badge: confirmed / pending / booked / rejected
+        ¦       +-- TagPill.tsx        # Tag chip component with color variants
+        ¦
+        +-- pages/
+            +-- auth/
+            ¦   +-- Login.tsx          # Email + password form, role-based redirect on success
+            ¦   +-- Signup.tsx         # Name, email, password, role selection
+            ¦
+            +-- user/
+            ¦   +-- MenteeDashboard.tsx  # Availability grid, Requirement form, Booking table
+            ¦
+            +-- mentor/
+            ¦   +-- MentorDashboard.tsx  # Availability grid, Confirmed calls table, Performance
+            ¦
+            +-- admin/
+                +-- AdminDashboard.tsx   # Platform stats overview + quick action links
+                +-- RequirementsQueue.tsx  # Pending queue, Batch match, Reject, Find Match
+                +-- MatchingWorkspace.tsx  # 3-panel: Mentee info, AI matches, Overlap grid
+                +-- MentorDirectory.tsx    # Directory grid, Filters, Quick Edit, Active toggle
+                +-- AdminBookings.tsx      # All bookings table, Status filter, CSV export
+                +-- AdminSettings.tsx      # AI config, Notifications, Timezone, DB backup
+```
+
+---
+
+## ? Quick Start
+
+### Prerequisites
+
+- **Node.js** >= 18
+- **PostgreSQL** >= 15
+- **Groq API Key** — free at [console.groq.com](https://console.groq.com)
+
+### 1 · Clone
 
 ```bash
 git clone https://github.com/BugHunterX2101/mentoring_call_scheduling_system.git
 cd mentoring_call_scheduling_system
 ```
 
-### 2. Backend Environment Setup
+### 2 · Backend Setup
 
 ```bash
 cd backend
 npm install
 ```
 
-Configure your `/backend/.env` file:
+Create `backend/.env`:
+
 ```env
 PORT=5000
-DATABASE_URL=postgresql://user:password@localhost:5432/your_database
-JWT_SECRET=your_super_secret_key
-GROQ_API_KEY=your_groq_api_key
+DATABASE_URL=postgresql://user:password@localhost:5432/mentorque
+JWT_SECRET=your_super_secret_jwt_key_here
+GROQ_API_KEY=gsk_your_groq_api_key_here
 ```
 
-Execute the server:
+Initialize database and seed demo data:
+
+```bash
+# Create schema (run via psql or your DB client)
+psql -d mentorque -f src/config/schema.sql
+
+# Seed demo accounts and availability
+node src/config/seed.js
+```
+
+Start the API server:
+
 ```bash
 npm run dev
+# API running at http://localhost:5000
 ```
 
-### 3. Frontend Environment Setup
+### 3 · Frontend Setup
 
 ```bash
-cd frontend
+cd ../frontend
 npm install
 ```
 
-Configure your `/frontend/.env` file:
+Create `frontend/.env`:
+
 ```env
 VITE_API_URL=http://localhost:5000/api
 ```
 
-Execute the frontend client:
+Start the development server:
+
 ```bash
 npm run dev
+# App running at http://localhost:5173
 ```
 
-Navigate to [http://localhost:5173](http://localhost:5173).
+### 4 · Demo Accounts
+
+| Role | Email | Password |
+|---|---|---|
+| ??? Admin | `admin@mentorque.com` | `adminpassword` |
+| ?? Mentor | `mentor1@example.com` | `password123` |
+| ?? Mentee | `user1@example.com` | `password123` |
 
 ---
 
-## Deployment (Vercel)
+## ?? Deployment (Vercel)
 
-This repository is optimized for **Vercel Monorepo Deployment** using a unified `vercel.json` configuration at the root level.
+This repository is pre-configured as a **Vercel Monorepo** with a single `vercel.json` at the root.
 
-1. Connect your GitHub repository to Vercel.
-2. The root `vercel.json` automatically orchestrates the build:
-   - Evaluates `/frontend/package.json` using `@vercel/static-build` and handles Vite SPA routing (`/index.html` fallback).
-   - Evaluates `/backend/src/app.js` using `@vercel/node`, exposing it as a Serverless Function mapped to `/api/*`.
-3. Add the required Environment Variables in the Vercel dashboard (`DATABASE_URL`, `JWT_SECRET`, `GROQ_API_KEY`).
-4. Deploy!
+### Steps
+
+1. **Push** your code to GitHub
+2. **Import** the repository on [vercel.com](https://vercel.com)
+3. **Set Environment Variables** in the Vercel project settings:
+
+```
+DATABASE_URL  ?  your production PostgreSQL connection string
+JWT_SECRET    ?  a strong random secret
+GROQ_API_KEY  ?  your Groq API key
+```
+
+4. **Deploy** — Vercel auto-detects the build config:
+
+```json
+{
+  "builds": [
+    { "src": "frontend/package.json", "use": "@vercel/static-build" },
+    { "src": "backend/src/app.js",    "use": "@vercel/node" }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/backend/src/app.js" },
+    { "src": "/(.*)",     "dest": "/frontend/index.html" }
+  ]
+}
+```
+
+The frontend is served as a static SPA with client-side routing fallback. The backend runs as a Vercel Serverless Function at `/api/*`.
 
 ---
 
-## Project Directory Structure
+## ?? Security Model
 
-```text
-mentoring_call_scheduling_system/
-|-- backend/
-|   |-- src/
-|   |   |-- config/          # DB connection (db.js), migrations, and seed scripts
-|   |   |-- middleware/      # JWT auth (auth.middleware.js) and RBAC guards
-|   |   |-- modules/         # API Route Controllers
-|   |   |   |-- auth/        # Login & Signup routes with bcrypt
-|   |   |   |-- availability/# Mentor scheduling slots & Overlap calculation (overlap.util.js)
-|   |   |   |-- bookings/    # Session booking logic & Lifecycle workflows (Cancel/Reject)
-|   |   |   |-- mentors/     # Mentor directory & active status toggling
-|   |   |   |-- recommendations/ # AI Matchmaking engine (groqService.js)
-|   |   |   |-- requirements/# Mentee requests & Batch Matching queue
-|   |   |   `-- settings/    # Dynamic Admin configurations & DB Backups
-|   |   `-- app.js           # Express application configuration
-|   |   `-- server.js        # Express server entry point
-|   |-- fixPasswords.js      # Utility script for hash migration
-|   |-- .env                 # Backend environment variables
-|   `-- package.json
-|
-|-- frontend/
-|   |-- src/
-|   |   |-- app/             # Application router (routes.tsx)
-|   |   |-- components/
-|   |   |   |-- layout/      # Shared dashboard layouts and sidebars
-|   |   |   `-- ui/          # Reusable UI primitives (TimeGrid, TagPill)
-|   |   |-- lib/
-|   |   |   |-- api/         # Fetch wrapper with interceptors
-|   |   |   `-- auth/        # AuthContext provider & state hooks
-|   |   |-- pages/
-|   |   |   |-- admin/       # RequirementsQueue, MatchingWorkspace, AdminSettings
-|   |   |   |-- auth/        # Login.tsx & Signup.tsx interfaces
-|   |   |   |-- mentor/      # MentorDashboard & confirmed calls
-|   |   |   `-- user/        # MenteeDashboard & dynamic AI helper
-|   |   |-- App.tsx          # Main Application shell
-|   |   |-- index.css        # Tailwind directives
-|   |   `-- main.tsx         # React root
-|   |-- .env                 # Frontend environment variables
-|   |-- tailwind.config.js   # Tailwind theme configuration
-|   `-- vite.config.ts
-|
-`-- vercel.json              # Unified Vercel Monorepo routing & build configuration
+```mermaid
+flowchart LR
+    Req["Incoming Request"] --> MW["auth.middleware.js\n(requireAuth)"]
+    MW -- "No token or invalid" --> E401["401 Unauthorized"]
+    MW -- "Valid JWT" --> Dec["Decode payload\nreq.user = id, role"]
+    Dec --> RBAC["rbac.middleware.js\n(requireRole)"]
+    RBAC -- "Role mismatch" --> E403["403 Forbidden"]
+    RBAC -- "Role matches" --> Handler["Route Handler\n(Business Logic)"]
+    Handler --> PG["PostgreSQL\n(parameterized queries)"]
+```
+
+- **Passwords** hashed with `bcrypt` (10 salt rounds) — plaintext never stored
+- **JWT** tokens verified on every protected request via `Authorization: Bearer <token>`
+- **RBAC** enforced at route level — admins, mentors, and users have distinct API access
+- **SQL Injection** prevented by parameterized queries (`$1, $2, ...`) throughout all database calls
+- **CORS** configured on the Express app — restrict `origin` in production to your frontend domain
+
+---
+
+## ??? User Journey Map
+
+```mermaid
+journey
+    title Complete Mentoring Lifecycle
+    section Mentee Onboarding
+      Sign Up with email and role: 5: Mentee
+      Set Weekly Availability: 4: Mentee
+      Submit Requirement: 5: Mentee
+    section Admin Processing
+      Review Requirements Queue: 5: Admin
+      Run AI Batch Match: 4: Admin
+      Open Matching Workspace: 5: Admin
+      Select Overlap Slot: 4: Admin
+      Confirm Booking: 5: Admin
+    section Session Delivery
+      Mentor Sees Upcoming Booking: 5: Mentor
+      Mentee Sees Upcoming Booking: 5: Mentee
+      Session Completed: 5: Mentor, Mentee
 ```
 
 ---
 
-## Licensing
+## ?? API Reference
 
-Distributed under the MIT License. Free for commercial and non-commercial utilization.
+### Authentication
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `POST` | `/api/auth/login` | None | Login and receive JWT token |
+| `POST` | `/api/auth/signup` | None | Register a new account |
+| `GET` | `/api/auth/me` | JWT | Get current user + profile |
+
+### Availability
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `GET` | `/api/availability/me` | User / Mentor | Get own recurring availability |
+| `PUT` | `/api/availability/me` | User / Mentor | Replace own availability (full swap) |
+| `GET` | `/api/availability/overlap` | Admin | Get slot intersection for a user + mentor pair |
+
+### Requirements
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `POST` | `/api/requirements` | User | Submit a new mentoring request |
+| `GET` | `/api/requirements` | Admin | List all requirements (filterable by status) |
+| `GET` | `/api/requirements/me` | User | Get own submitted requirements |
+| `GET` | `/api/requirements/:id` | Any | Get a single requirement by ID |
+| `PATCH` | `/api/requirements/:id/status` | Admin | Update status (reject, match, etc.) |
+| `POST` | `/api/requirements/batch-match` | Admin | Trigger AI matching for multiple IDs |
+| `DELETE` | `/api/requirements/:id` | Admin / Owner | Delete a requirement (blocked if booked) |
+
+### Recommendations
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `POST` | `/api/recommendations/:reqId` | Admin | Run AI ranking for a requirement |
+| `GET` | `/api/recommendations/summary` | JWT | Get platform-wide match summary stats |
+
+### Bookings
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `POST` | `/api/bookings` | Admin | Confirm a booking (transactional) |
+| `GET` | `/api/bookings/me` | User / Mentor | Get own bookings |
+| `GET` | `/api/bookings/all` | Admin | Get all platform bookings |
+| `DELETE` | `/api/bookings/:id` | Admin / Owner | Cancel booking + revert requirement to pending |
+
+### Mentors
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `GET` | `/api/mentors` | Admin | Get full mentor directory |
+| `PATCH` | `/api/mentors/:id` | Admin | Update mentor profile (tags, bio, isActive) |
+| `GET` | `/api/mentors/me/performance` | Mentor | Get own compatibility performance score |
+
+### Settings
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `GET` | `/api/settings` | Admin | Get platform configuration |
+| `PATCH` | `/api/settings` | Admin | Save configuration changes |
+| `POST` | `/api/settings/backup` | Admin | Trigger PostgreSQL database backup |
+| `POST` | `/api/settings/clear-cache` | Admin | Clear system-level cache |
+
+---
+
+## ?? Contributing
+
+1. Fork this repository
+2. Create a feature branch: `git checkout -b feat/your-feature`
+3. Commit with a descriptive message following [Conventional Commits](https://www.conventionalcommits.org/)
+4. Open a Pull Request
+
+---
+
+## ?? License
+
+Distributed under the **MIT License**. Free for commercial and personal use.
 
 ---
 
 <div align="center">
-  <p>Engineered as a comprehensive full-stack technical showcase.</p>
+  <br/>
+  <p>
+    <strong>Mentorque</strong> — Engineered as a comprehensive full-stack technical showcase.<br/>
+    Built with React 18 · Node.js · PostgreSQL · Groq AI
+  </p>
+  <br/>
 </div>
