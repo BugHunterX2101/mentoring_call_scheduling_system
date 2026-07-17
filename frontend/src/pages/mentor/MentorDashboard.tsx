@@ -10,19 +10,6 @@ export function MentorDashboard() {
   const [slots, setSlots] = useState<TimeSlot[]>([]);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
   const [performance, setPerformance] = useState({ score: 85, metric: 'Base compatibility rating' });
-  
-  // Added State for Button Interactivity
-  const [weekOffset, setWeekOffset] = useState(0);
-
-  // Date Calculation
-  const getWeekDates = (offset: number) => {
-    const today = new Date();
-    const start = new Date(today);
-    start.setDate(today.getDate() - today.getDay() + (offset * 7));
-    const end = new Date(start);
-    end.setDate(start.getDate() + 6);
-    return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} — ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
-  };
 
   useEffect(() => {
     fetchData();

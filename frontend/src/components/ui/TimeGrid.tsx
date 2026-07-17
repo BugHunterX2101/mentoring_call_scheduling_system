@@ -140,20 +140,7 @@ export function TimeGrid({
               let content = null;
               
               if (slot) {
-                if (slot.type === 'mentor' || (editable && window.location.pathname.includes('mentor'))) {
-                   content = (
-                     <div className="absolute inset-0 bg-primary text-white p-2 rounded-sm shadow-sm z-10 flex flex-col justify-start items-start m-1">
-                       <span className="text-[9px] font-bold tracking-widest uppercase">Available</span>
-                       <span className="text-[10px] font-bold">{hour.toString().padStart(2, '0')}:00 — {hour + 1}:00</span>
-                     </div>
-                   );
-                } else if (slot.type === 'user' || (editable && window.location.pathname.includes('user'))) {
-                   content = (
-                     <div className="absolute inset-1 bg-primary text-white flex items-center justify-center rounded-sm shadow-sm z-10">
-                       <span className="text-sm font-bold">✓</span>
-                     </div>
-                   );
-                } else if (slot.type === 'overlap') {
+                if (slot.type === 'overlap') {
                    const isSelected = selectedSlot?.day_of_week === day && selectedSlot?.start_time === slot.start_time;
                    if (isSelected) {
                      content = (
@@ -171,6 +158,13 @@ export function TimeGrid({
                        </div>
                      );
                    }
+                } else if (slot.type === 'mentor' || slot.type === 'user' || slot.type === 'available' || editable) {
+                   content = (
+                     <div className="absolute inset-0 bg-primary text-white p-2 rounded-sm shadow-sm z-10 flex flex-col justify-start items-start m-1">
+                       <span className="text-[9px] font-bold tracking-widest uppercase">Available</span>
+                       <span className="text-[10px] font-bold">{hour.toString().padStart(2, '0')}:00 — {hour + 1}:00</span>
+                     </div>
+                   );
                 }
               }
 

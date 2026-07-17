@@ -21,24 +21,11 @@ export function MenteeDashboard() {
   // AI Summary State
   const [aiSummary, setAiSummary] = useState<any>(null);
 
-  // Added States for Button Interactivity
-  const [weekOffset, setWeekOffset] = useState(0);
+  // UI States
   const [expandedReqId, setExpandedReqId] = useState<string | null>(null);
   const [showAllHistory, setShowAllHistory] = useState(false);
-
-  // Date Calculation
-  const getWeekDates = (offset: number) => {
-    const today = new Date();
-    const start = new Date(today);
-    // Find the current week's Sunday
-    start.setDate(today.getDate() - today.getDay() + (offset * 7));
-    
-    const end = new Date(start);
-    end.setDate(start.getDate() + 6);
-    
-    const formatOpts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
-    return `${start.toLocaleDateString('en-US', formatOpts)} — ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
-  };
+  
+  // Date Calculation logic removed (handled by TimeGrid)
 
   const fetchData = useCallback(async () => {
     try {
@@ -158,19 +145,7 @@ export function MenteeDashboard() {
                 <p className="text-sm text-text-muted mt-1">Select slots to indicate when you are free for mentoring sessions.</p>
               </div>
               <div className="flex items-center gap-4">
-                <button 
-                  onClick={() => setWeekOffset(prev => prev - 1)}
-                  className="w-8 h-8 rounded border border-border-subtle flex items-center justify-center hover:bg-surface-container-low transition-colors"
-                >
-                   <ChevronLeft size={16} className="text-primary" />
-                </button>
-                <span className="text-sm font-bold text-primary w-[140px] text-center">{getWeekDates(weekOffset)}</span>
-                <button 
-                  onClick={() => setWeekOffset(prev => prev + 1)}
-                  className="w-8 h-8 rounded border border-border-subtle flex items-center justify-center hover:bg-surface-container-low transition-colors"
-                >
-                   <ChevronRight size={16} className="text-primary" />
-                </button>
+                {/* Week navigation handled internally by TimeGrid */}
               </div>
             </div>
             
