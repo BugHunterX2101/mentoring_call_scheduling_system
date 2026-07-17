@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { DashboardLayout } from '../../components/layout/DashboardLayout';
-import { Settings, Bell, Shield, Database, Save } from 'lucide-react';
+import { Settings, Bell, Database, Save } from 'lucide-react';
 import { apiClient } from '../../lib/api/client';
 
 export function AdminSettings() {

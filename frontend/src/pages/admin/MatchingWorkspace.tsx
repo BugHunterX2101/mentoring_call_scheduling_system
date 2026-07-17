@@ -2,9 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../../components/layout/DashboardLayout';
 import { apiClient } from '../../lib/api/client';
-import { TagPill } from '../../components/ui/TagPill';
 import { TimeGrid, type TimeSlot } from '../../components/ui/TimeGrid';
-import { Zap, Video, Calendar, Search, UserCircle } from 'lucide-react';
+import { Zap, Video, Search } from 'lucide-react';
 
 export function MatchingWorkspace() {
   const { id } = useParams();
@@ -57,6 +56,7 @@ export function MatchingWorkspace() {
       })
       .catch(console.error)
       .finally(() => setLoadingReq(false));
+      // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const confirmBooking = async () => {

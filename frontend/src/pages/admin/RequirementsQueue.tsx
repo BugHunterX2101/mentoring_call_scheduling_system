@@ -3,7 +3,7 @@ import { DashboardLayout } from '../../components/layout/DashboardLayout';
 import { apiClient } from '../../lib/api/client';
 import { TagPill } from '../../components/ui/TagPill';
 import { Link } from 'react-router-dom';
-import { Sparkles, ArrowRight } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 
 export function RequirementsQueue() {
   const [requirements, setRequirements] = useState<any[]>([]);
@@ -27,13 +27,7 @@ export function RequirementsQueue() {
     fetchReqs();
   }, []);
 
-  const toggleSelectAll = () => {
-    if (selectedIds.size === requirements.length) {
-      setSelectedIds(new Set());
-    } else {
-      setSelectedIds(new Set(requirements.map(r => r.id)));
-    }
-  };
+
 
   const toggleSelect = (id: string) => {
     const next = new Set(selectedIds);

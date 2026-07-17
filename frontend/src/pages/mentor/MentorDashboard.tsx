@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { DashboardLayout } from '../../components/layout/DashboardLayout';
 import { apiClient } from '../../lib/api/client';
 import { TimeGrid, type TimeSlot } from '../../components/ui/TimeGrid';
-import { Calendar, Video, Phone } from 'lucide-react';
-import { TagPill } from '../../components/ui/TagPill';
+import { Calendar, Video } from 'lucide-react';
 
 export function MentorDashboard() {
   const [bookings, setBookings] = useState<any[]>([]);
@@ -20,10 +19,10 @@ export function MentorDashboard() {
       const [bookingsData, availData, perfData] = await Promise.all([
         apiClient.fetch('/bookings/me'),
         apiClient.fetch('/availability/me'),
-        apiClient.fetch('/mentors/me/performance').catch(() => ({ score: 85, metric: 'Base compatibility rating' }))
+        apiClient.fetch('/mentors/me/performance').catch(() => ({ score: 0, metric: 'No ratings yet' }))
       ]);
       setBookings(bookingsData.bookings);
-      if (perfData.score) {
+      if (perfData && perfData.score !== undefined) {
         setPerformance(perfData);
       }
       

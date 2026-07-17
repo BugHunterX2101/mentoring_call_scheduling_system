@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { DashboardLayout } from '../../components/layout/DashboardLayout';
 import { apiClient } from '../../lib/api/client';
-import { Users, FileText, CalendarCheck, Settings, ArrowRight } from 'lucide-react';
+import { Users, FileText, CalendarCheck, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export function AdminDashboard() {

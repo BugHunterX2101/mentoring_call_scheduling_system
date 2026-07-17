@@ -89,7 +89,7 @@ export function TimeGrid({
             className="w-6 h-6 rounded border border-border-subtle flex items-center justify-center text-text-muted hover:bg-surface-container-low transition-colors"
           >&lt;</button>
           <button 
-            onClick={() => setWeekOffset(w => 0)}
+            onClick={() => setWeekOffset(0)}
             className="px-2 h-6 rounded border border-border-subtle flex items-center justify-center text-[10px] font-bold text-text-muted hover:bg-surface-container-low transition-colors uppercase"
           >Today</button>
           <button 

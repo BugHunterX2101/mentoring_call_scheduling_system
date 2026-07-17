@@ -96,6 +96,7 @@ export function SideNav() {
                     navigate('/admin/requirements'); // fallback
                   }
                 } catch(e) {
+                  console.error("Match error:", e);
                   navigate('/admin/requirements');
                 }
               }

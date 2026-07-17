@@ -3,7 +3,7 @@ import { DashboardLayout } from '../../components/layout/DashboardLayout';
 import { apiClient } from '../../lib/api/client';
 import { TagPill } from '../../components/ui/TagPill';
 import { TimeGrid, type TimeSlot } from '../../components/ui/TimeGrid';
-import { FileText, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { FileText, Plus } from 'lucide-react';
 
 export function MenteeDashboard() {
   const [requirements, setRequirements] = useState<any[]>([]);
@@ -58,6 +58,7 @@ export function MenteeDashboard() {
     } catch (error) {
       console.error(error);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
