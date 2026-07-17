@@ -759,27 +759,6 @@ journey
 
 ---
 
-## Changelog
-
-A record of all significant bug fixes and improvements made to the platform.
-
-### v1.3 - Full System Audit (Latest)
-
-| Area | Fix |
-|---|---|
-| **Backend - AI Matching** | Fixed `ReferenceError: filteredCandidates is not defined` in `groqService.js` that crashed every filtered AI matching call |
-| **Backend - Bookings** | Removed destructive `DELETE FROM availability` that wiped mentor and mentee availability for the entire matched day after a booking |
-| **Backend - DB Constraint** | Dropped stale `requirements_call_type_check` CHECK constraint that blocked `career_pivot` and `system_architecture` submissions (only 2 of 4 call types worked) |
-| **Backend - Imports** | Removed dead `requireRole` import from `availability.routes.js` |
-| **Frontend - Auth Flow** | Fixed `login()` not being `await`ed in Login and Signup — prevented race condition where navigation fired before `AuthContext` finished setting the user state |
-| **Frontend - Routing** | Fixed admin post-login redirect from `/admin/requirements` to `/admin/dashboard` in Login, Signup, and RoleGuard |
-| **Frontend - UI** | Fixed `MatchingWorkspace` page title from generic "Schedule Overview" to "AI Matching Workspace" |
-| **Frontend - UX** | Added `setError('')` clearing on re-submission in Login so stale error messages don't persist |
-| **Frontend - TimeGrid** | Locked past date/time cells to prevent editing historical availability slots |
-| **Backend - Requirements** | Replaced hardcoded call-type whitelists with dynamic DB validation via the `call_types` table |
-| **Backend - Mentors** | Fixed SQL join (`user_profiles` vs `mentor_profiles`) that caused `column user_tags does not exist` error in mentor listing |
-
----
 
 ## License
 
