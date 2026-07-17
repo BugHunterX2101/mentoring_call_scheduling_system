@@ -72,6 +72,16 @@ export function MentorDashboard() {
 
   const clearAll = () => setSlots([]);
 
+  const handleCancelBooking = async (id: string) => {
+    if (!confirm('Cancel this booked session?')) return;
+    try {
+      await apiClient.fetch(`/bookings/${id}`, { method: 'DELETE' });
+      fetchData();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   return (
     <DashboardLayout title="Schedule Overview" searchPlaceholder="Search sessions...">
       <div className="flex gap-8 items-start">
@@ -154,9 +164,17 @@ export function MentorDashboard() {
                         </div>
                       </div>
                       
-                      <div className="flex items-center gap-2 text-xs text-text-muted font-medium">
-                        <Video size={14} />
-                        <span>Google Meet Session</span>
+                      <div className="flex items-center justify-between mt-4 border-t border-border-subtle pt-3">
+                        <div className="flex items-center gap-2 text-xs text-text-muted font-medium">
+                          <Video size={14} />
+                          <span>Google Meet Session</span>
+                        </div>
+                        <button 
+                          onClick={() => handleCancelBooking(book.id)}
+                          className="px-3 py-1.5 rounded bg-red-50 text-red-600 text-xs font-bold hover:bg-red-100 transition-colors"
+                        >
+                          Cancel
+                        </button>
                       </div>
                     </div>
                   );

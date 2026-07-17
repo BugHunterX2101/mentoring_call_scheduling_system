@@ -60,6 +60,19 @@ export function RequirementsQueue() {
     }
   };
 
+  const handleReject = async (id: string) => {
+    if (!confirm('Are you sure you want to reject this requirement?')) return;
+    try {
+      await apiClient.fetch(`/requirements/${id}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: 'rejected' })
+      });
+      fetchReqs();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   return (
     <DashboardLayout title="Pending Requirements" searchPlaceholder="Search mentees, tags, dates...">
       
@@ -186,11 +199,17 @@ export function RequirementsQueue() {
                     Find Match
                   </Link>
                   <button 
+                    onClick={() => handleReject(req.id)}
+                    className="w-full text-center bg-red-50 text-red-600 px-4 py-2 rounded text-xs font-bold shadow-sm hover:bg-red-100 transition-colors"
+                  >
+                    Reject
+                  </button>
+                  <button 
                     onClick={(e) => {
                        e.preventDefault();
                        setExpandedReqId(expandedReqId === req.id ? null : req.id);
                     }}
-                    className="text-[10px] font-bold text-text-muted hover:text-primary underline bg-transparent border-none p-0 cursor-pointer"
+                    className="text-[10px] font-bold text-text-muted hover:text-primary underline bg-transparent border-none p-0 cursor-pointer mt-1"
                   >
                      {expandedReqId === req.id ? 'Hide Details' : 'View Details'}
                   </button>

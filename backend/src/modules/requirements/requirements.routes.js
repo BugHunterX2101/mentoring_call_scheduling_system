@@ -142,4 +142,25 @@ router.post('/batch-match', requireAuth, rbac(['admin']), async (req, res) => {
   }
 });
 
+router.delete('/:id', requireAuth, async (req, res) => {
+  try {
+    const result = await db.query('SELECT * FROM requirements WHERE id = $1', [req.params.id]);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Not found' });
+    
+    const reqData = result.rows[0];
+    
+    // Auth check: Admin can delete any, user can delete their own
+    if (req.user.role !== 'admin' && req.user.id !== reqData.user_id) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+    
+    // If it's already booked and not an admin, might want to restrict, but let's just allow deletion.
+    await db.query('DELETE FROM requirements WHERE id = $1', [req.params.id]);
+    res.json({ success: true });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;

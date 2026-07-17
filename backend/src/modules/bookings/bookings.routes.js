@@ -76,4 +76,29 @@ router.get('/all', requireAuth, rbac(['admin']), async (req, res) => {
   }
 });
 
+router.delete('/:id', requireAuth, async (req, res) => {
+  try {
+    const result = await db.query('SELECT * FROM bookings WHERE id = $1', [req.params.id]);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Not found' });
+    
+    const booking = result.rows[0];
+    
+    // Auth check: Admin can delete any, user can delete their own, mentor can delete their own
+    if (req.user.role !== 'admin' && req.user.id !== booking.user_id && req.user.id !== booking.mentor_id) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+    
+    await db.query('BEGIN');
+    await db.query('DELETE FROM bookings WHERE id = $1', [req.params.id]);
+    await db.query('UPDATE requirements SET status = $1 WHERE id = $2', ['pending', booking.requirement_id]);
+    await db.query('COMMIT');
+    
+    res.json({ success: true });
+  } catch (error) {
+    await db.query('ROLLBACK');
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;

@@ -12,11 +12,26 @@ export function AdminBookings() {
   const itemsPerPage = 8;
 
   useEffect(() => {
+    fetchBookings();
+  }, []);
+
+  const fetchBookings = () => {
+    setLoading(true);
     apiClient.fetch('/bookings/all')
       .then(data => setBookings(data.bookings || []))
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, []);
+  };
+
+  const handleCancelBooking = async (id: string) => {
+    if (!confirm('Are you sure you want to cancel this booking?')) return;
+    try {
+      await apiClient.fetch(`/bookings/${id}`, { method: 'DELETE' });
+      fetchBookings();
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const totalPages = Math.ceil(bookings.length / itemsPerPage);
   const currentBookings = bookings.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -116,12 +131,20 @@ export function AdminBookings() {
                       <StatusBadge status={b.status} />
                     </td>
                     <td className="py-4 px-6 text-right">
-                      <button 
-                        onClick={() => setExpandedBookingId(expandedBookingId === b.id ? null : b.id)}
-                        className="text-xs font-bold text-text-muted hover:text-primary underline transition-colors"
-                      >
-                        {expandedBookingId === b.id ? 'Close' : 'Details'}
-                      </button>
+                      <div className="flex items-center justify-end gap-3">
+                        <button 
+                          onClick={() => setExpandedBookingId(expandedBookingId === b.id ? null : b.id)}
+                          className="text-xs font-bold text-text-muted hover:text-primary underline transition-colors"
+                        >
+                          {expandedBookingId === b.id ? 'Close' : 'Details'}
+                        </button>
+                        <button 
+                          onClick={() => handleCancelBooking(b.id)}
+                          className="px-2 py-1 rounded bg-red-50 text-red-600 text-[10px] font-bold hover:bg-red-100 transition-colors uppercase tracking-widest"
+                        >
+                          Cancel
+                        </button>
+                      </div>
                     </td>
                   </tr>
                   

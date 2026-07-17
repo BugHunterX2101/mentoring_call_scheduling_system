@@ -7,6 +7,7 @@ import { FileText, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export function MenteeDashboard() {
   const [requirements, setRequirements] = useState<any[]>([]);
+  const [bookings, setBookings] = useState<any[]>([]);
   const [slots, setSlots] = useState<TimeSlot[]>([]);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
   const [callType, setCallType] = useState('resume_revamp');
@@ -41,13 +42,15 @@ export function MenteeDashboard() {
 
   const fetchData = useCallback(async () => {
     try {
-      const [reqsData, availData, aiData, typesData] = await Promise.all([
+      const [reqsData, bookingsData, availData, aiData, typesData] = await Promise.all([
         apiClient.fetch('/requirements/me'),
+        apiClient.fetch('/bookings/me'),
         apiClient.fetch('/availability/me'),
         apiClient.fetch('/recommendations/summary'),
         apiClient.fetch('/settings/call-types').catch(() => ({ callTypes: [] }))
       ]);
       setRequirements(reqsData.requirements || []);
+      setBookings(bookingsData.bookings || []);
       setAiSummary(aiData);
       if (typesData.callTypes && typesData.callTypes.length > 0) {
         setCallTypesList(typesData.callTypes);
@@ -115,6 +118,26 @@ export function MenteeDashboard() {
       setDescription('');
       setTags([]);
       fetchData(); // Auto-refresh UI
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleCancelRequest = async (id: string) => {
+    if (!confirm('Cancel this request?')) return;
+    try {
+      await apiClient.fetch(`/requirements/${id}`, { method: 'DELETE' });
+      fetchData();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleCancelBooking = async (id: string) => {
+    if (!confirm('Cancel this booked session?')) return;
+    try {
+      await apiClient.fetch(`/bookings/${id}`, { method: 'DELETE' });
+      fetchData();
     } catch (e) {
       console.error(e);
     }
@@ -336,21 +359,85 @@ export function MenteeDashboard() {
                       <tr className="bg-surface-container-lowest border-b border-border-subtle">
                          <td colSpan={5} className="px-6 py-4">
                             <div className="text-sm p-4 bg-surface rounded-lg border border-border-subtle">
-                               <p className="font-bold text-primary mb-2">Request Context:</p>
-                               <p className="text-text-muted italic mb-4">"{req.description}"</p>
-                               <div className="flex items-center gap-2">
-                                  <span className="text-xs font-bold text-primary">Required Tags:</span>
-                                  <div className="flex gap-2">
-                                     {(req.user_tags || []).map((t: string) => <TagPill key={t} label={t} color="gray" />)}
-                                     {(!req.user_tags || req.user_tags.length === 0) && <span className="text-xs text-text-muted">None specified</span>}
+                                <p className="font-bold text-primary mb-2">Request Context:</p>
+                                <p className="text-text-muted italic mb-4">"{req.description}"</p>
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs font-bold text-primary">Required Tags:</span>
+                                    <div className="flex gap-2">
+                                       {(req.user_tags || []).map((t: string) => <TagPill key={t} label={t} color="gray" />)}
+                                       {(!req.user_tags || req.user_tags.length === 0) && <span className="text-xs text-text-muted">None specified</span>}
+                                    </div>
                                   </div>
-                               </div>
+                                  {req.status === 'pending' && (
+                                    <button 
+                                      onClick={() => handleCancelRequest(req.id)}
+                                      className="px-3 py-1.5 rounded bg-red-50 text-red-600 text-xs font-bold hover:bg-red-100 transition-colors"
+                                    >
+                                      Cancel Request
+                                    </button>
+                                  )}
+                                </div>
                             </div>
                          </td>
                       </tr>
                     )}
                   </React.Fragment>
                 ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      {/* My Bookings */}
+      <div className="mt-8 bg-surface-container-lowest border border-border-subtle rounded-lg shadow-sm w-full">
+        <div className="p-6 border-b border-border-subtle">
+          <h3 className="text-lg font-bold text-primary">My Confirmed Bookings</h3>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left">
+            <thead className="text-xs text-text-muted bg-surface border-b border-border-subtle">
+              <tr>
+                <th className="px-6 py-4 font-normal">Mentor</th>
+                <th className="px-6 py-4 font-normal">Date (UTC)</th>
+                <th className="px-6 py-4 font-normal">Status</th>
+                <th className="px-6 py-4 font-normal text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {bookings.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="px-6 py-4 text-center text-text-muted">No confirmed bookings found.</td>
+                </tr>
+              ) : (
+                bookings.map(book => {
+                  const date = new Date(book.start_time);
+                  return (
+                    <tr key={book.id} className="border-b border-border-subtle last:border-0 hover:bg-surface-container-low">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                           <img src={`https://ui-avatars.com/api/?name=${book.mentor_name}&background=random`} alt="" className="w-8 h-8 rounded-full border border-border-subtle" />
+                           <span className="font-bold text-primary text-xs">{book.mentor_name}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-text-muted text-xs">
+                        {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at {date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </td>
+                      <td className="px-6 py-4">
+                         <TagPill label={book.status} color="green" />
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                         <button 
+                           onClick={() => handleCancelBooking(book.id)}
+                           className="px-3 py-1.5 rounded bg-red-50 text-red-600 text-xs font-bold hover:bg-red-100 transition-colors"
+                         >
+                           Cancel
+                         </button>
+                      </td>
+                    </tr>
+                  )
+                })
               )}
             </tbody>
           </table>
