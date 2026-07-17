@@ -1,0 +1,9 @@
+{
+  "name": "mentoring_call_scheduling_system",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "postinstall": "cd backend && npm install && cd ../frontend && npm install",
+    "build": "cd frontend && npm run build"
+  }
+}
