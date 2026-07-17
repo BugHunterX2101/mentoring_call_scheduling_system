@@ -178,6 +178,7 @@ sequenceDiagram
 |---|---|
 | AI-Powered Matching | Evaluates mentor pools against mentee needs using Groq's LLaMA 3.1, returning a ranked fit score and customized rationale. |
 | Batch Processing | Multi-select interface in the Requirements Queue to trigger background matching for dozens of mentees simultaneously using the LLaMA 3.1 LLM pipeline. |
+| Complete Lifecycle Management | Cancel or reject requirements and bookings from any dashboard (Mentee, Mentor, Admin), with automatic status restoration for re-matching. |
 | Overlap Analysis | Visual TimeGrid explicitly highlights mutual availability overlaps between a mentee and a selected mentor in real-time. |
 | Mentor Directory | Real-time directory with Quick Filters (FAANG, Active Only) and instant state toggling for mentor availability. |
 | Platform Settings & Backups | A fully dynamic settings configuration console backed by PostgreSQL, allowing admins to toggle algorithm flags and generate local `.sql` database dumps with a click. |
@@ -194,7 +195,7 @@ sequenceDiagram
 | Real-Time Dashboard | Mentees receive live AI feedback banners indicating the number of mentors in the network matching their exact timezone/needs. |
 | Confirmed Sessions | Mentors see a live-updating sidebar of confirmed upcoming calls mapped exactly to their availability inputs. |
 | UI State Polish | Smooth inline UI state transitions (e.g. "✓ Saved!" buttons) providing satisfying micro-interactions without intrusive browser alerts. |
-| TimeGrid State Management | Drag, drop, and clear scheduling grids that intelligently format complex timestamp logic into simple UI states. |
+| Dynamic TimeGrid | Advanced React-based weekly scheduling grid featuring dynamic date rendering, active week navigation (Next/Last week mapping), and drag-to-select functionality. |
 
 ---
 
@@ -263,6 +264,19 @@ npm run dev
 ```
 
 Navigate to [http://localhost:5173](http://localhost:5173).
+
+---
+
+## Deployment (Vercel)
+
+This repository is optimized for **Vercel Monorepo Deployment** using a unified `vercel.json` configuration at the root level.
+
+1. Connect your GitHub repository to Vercel.
+2. The root `vercel.json` automatically orchestrates the build:
+   - Evaluates `/frontend/package.json` using `@vercel/static-build` and handles Vite SPA routing (`/index.html` fallback).
+   - Evaluates `/backend/src/app.js` using `@vercel/node`, exposing it as a Serverless Function mapped to `/api/*`.
+3. Add the required Environment Variables in the Vercel dashboard (`DATABASE_URL`, `JWT_SECRET`, `GROQ_API_KEY`).
+4. Deploy!
 
 ---
 
