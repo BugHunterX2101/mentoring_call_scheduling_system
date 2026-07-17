@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { DashboardLayout } from '../../components/layout/DashboardLayout';
 import { apiClient } from '../../lib/api/client';
-import { TagPill } from '../../components/ui/TagPill';
+import { StatusBadge } from '../../components/ui/StatusBadge';
 import { TimeGrid, type TimeSlot } from '../../components/ui/TimeGrid';
 import { FileText, Plus } from 'lucide-react';
 
@@ -131,6 +131,8 @@ export function MenteeDashboard() {
     }
   };
 
+  const clearAllAvailability = () => setSlots([]);
+
   return (
     <DashboardLayout title="Schedule Overview" searchPlaceholder="Search sessions...">
       <div className="flex gap-8 items-start">
@@ -155,10 +157,13 @@ export function MenteeDashboard() {
               editable={true} 
               onSlotsChange={setSlots} 
               startHour={9} 
-              endHour={15} 
+              endHour={16} 
             />
             
-            <div className="mt-6 flex justify-end pt-4 border-t border-border-subtle">
+            <div className="mt-6 flex justify-end gap-3 pt-4 border-t border-border-subtle">
+              <button onClick={clearAllAvailability} className="px-4 py-2 border border-border-subtle text-text-muted hover:text-primary text-sm font-bold rounded transition-colors">
+                Clear All
+              </button>
               <button 
                 onClick={handleSaveAvailability} 
                 disabled={saveStatus === 'saving'}
@@ -311,13 +316,7 @@ export function MenteeDashboard() {
                         {new Date(req.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                       </td>
                       <td className="px-6 py-4">
-                        {req.status === 'pending' ? (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-600 border border-amber-200">
-                            Pending
-                          </span>
-                        ) : (
-                          <TagPill label={req.status} color="green" />
-                        )}
+                        <StatusBadge status={req.status} />
                       </td>
                       <td className="px-6 py-4 text-text-muted text-xs">
                          {req.status === 'pending' ? 'Matching in progress...' : 'Matched'}
@@ -341,7 +340,9 @@ export function MenteeDashboard() {
                                   <div className="flex items-center gap-2">
                                     <span className="text-xs font-bold text-primary">Required Tags:</span>
                                     <div className="flex gap-2">
-                                       {(req.user_tags || []).map((t: string) => <TagPill key={t} label={t} color="gray" />)}
+                                       {(req.user_tags || []).map((t: string) => (
+                                         <span key={t} className="px-2 py-0.5 bg-surface-container-low text-xs text-text-muted rounded border border-border-subtle">{t}</span>
+                                       ))}
                                        {(!req.user_tags || req.user_tags.length === 0) && <span className="text-xs text-text-muted">None specified</span>}
                                     </div>
                                   </div>
@@ -401,7 +402,7 @@ export function MenteeDashboard() {
                         {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at {date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </td>
                       <td className="px-6 py-4">
-                         <TagPill label={book.status} color="green" />
+                         <StatusBadge status={book.status} />
                       </td>
                       <td className="px-6 py-4 text-right">
                          <button 
