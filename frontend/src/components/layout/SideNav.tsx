@@ -117,7 +117,7 @@ export function SideNav() {
             <p className="text-sm font-semibold text-primary truncate">{user.name}</p>
             <p className="text-xs text-text-muted truncate">{user.role}</p>
           </div>
-          <button onClick={logout} className="text-text-muted hover:text-error transition-colors ml-auto text-xs font-medium" title="Logout">
+          <button onClick={() => { logout(); navigate('/login'); }} className="text-text-muted hover:text-error transition-colors ml-auto text-xs font-medium" title="Logout">
             Logout
           </button>
         </div>

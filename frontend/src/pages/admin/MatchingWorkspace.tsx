@@ -256,7 +256,7 @@ export function MatchingWorkspace() {
                    slots={overlapSlots}
                    editable={false}
                    startHour={9}
-                   endHour={15}
+                   endHour={16}
                    selectedSlot={selectedTimeSlot}
                    onSlotSelect={setSelectedTimeSlot}
                    displayDays={[1, 2, 3, 4, 5]} // Mon-Fri as per design

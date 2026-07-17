@@ -49,7 +49,7 @@ export function AdminBookings() {
     const csvContent = [
       headers.join(','),
       ...bookings.map(b => `${b.id},"${b.user_name}","${b.mentor_name}","${new Date(b.start_time).toISOString()}","${new Date(b.end_time).toISOString()}","${b.status}"`)
-    ].join('\\n');
+    ].join('\n');
     
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);

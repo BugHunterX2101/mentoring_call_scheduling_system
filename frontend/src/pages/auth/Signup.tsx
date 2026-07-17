@@ -25,10 +25,8 @@ export function Signup() {
       setError('Password must be at least 8 characters long');
       return false;
     }
-    const domain = email.split('@')[1]?.toLowerCase();
-    const forbiddenDomains = ['example.com', 'test.com', 'demo.com', 'mailinator.com', 'tempmail.com'];
-    if (!domain || forbiddenDomains.includes(domain)) {
-      setError('Please use a valid, verified email domain (test domains like example.com are not allowed)');
+    if (!email.includes('@') || !email.includes('.')) {
+      setError('Please enter a valid email address');
       return false;
     }
     return true;

@@ -390,12 +390,16 @@ export function MenteeDashboard() {
               ) : (
                 bookings.map(book => {
                   const date = new Date(book.start_time);
+                  const isUpcoming = date > new Date();
                   return (
-                    <tr key={book.id} className="border-b border-border-subtle last:border-0 hover:bg-surface-container-low">
+                    <tr key={book.id} className={`border-b border-border-subtle last:border-0 hover:bg-surface-container-low ${!isUpcoming ? 'opacity-60' : ''}`}>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                            <img src={`https://ui-avatars.com/api/?name=${book.mentor_name}&background=random`} alt="" className="w-8 h-8 rounded-full border border-border-subtle" />
-                           <span className="font-bold text-primary text-xs">{book.mentor_name}</span>
+                           <div>
+                             <span className="font-bold text-primary text-xs">{book.mentor_name}</span>
+                             <p className="text-[10px] text-text-muted mt-0.5">{isUpcoming ? 'Upcoming' : 'Past Session'}</p>
+                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 text-text-muted text-xs">
@@ -405,12 +409,16 @@ export function MenteeDashboard() {
                          <StatusBadge status={book.status} />
                       </td>
                       <td className="px-6 py-4 text-right">
-                         <button 
-                           onClick={() => handleCancelBooking(book.id)}
-                           className="px-3 py-1.5 rounded bg-red-50 text-red-600 text-xs font-bold hover:bg-red-100 transition-colors"
-                         >
-                           Cancel
-                         </button>
+                         {isUpcoming ? (
+                           <button 
+                             onClick={() => handleCancelBooking(book.id)}
+                             className="px-3 py-1.5 rounded bg-red-50 text-red-600 text-xs font-bold hover:bg-red-100 transition-colors"
+                           >
+                             Cancel
+                           </button>
+                         ) : (
+                           <span className="text-xs text-text-muted italic">Completed</span>
+                         )}
                       </td>
                     </tr>
                   )

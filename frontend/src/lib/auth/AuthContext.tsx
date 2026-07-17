@@ -14,7 +14,7 @@ interface AuthContextType {
   user: User | null;
   profile: any | null;
   loading: boolean;
-  login: (token: string, userData: User) => void;
+  login: (token: string, userData: User) => Promise<void>;
   logout: () => void;
 }
 
@@ -43,10 +43,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     initAuth();
   }, []);
 
-  const login = (token: string, userData: User) => {
+  const login = async (token: string, userData: User) => {
     localStorage.setItem('token', token);
     setUser(userData);
-    // Ideally refetch /me or set profile if returned in login
+    // Refetch full profile from /auth/me to hydrate the profile state
+    try {
+      const data = await apiClient.fetch('/auth/me');
+      setUser(data.user);
+      setProfile(data.profile);
+    } catch (error) {
+      console.error('Failed to fetch user profile after login:', error);
+    }
   };
 
   const logout = () => {

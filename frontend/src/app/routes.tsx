@@ -96,6 +96,8 @@ export function AppRoutes() {
           />
 
           <Route path="/" element={<Navigate to="/login" replace />} />
+          {/* Catch-all: redirect unknown routes */}
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

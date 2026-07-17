@@ -45,13 +45,14 @@ export function TimeGrid({
   editable = false, 
   onSlotsChange, 
   startHour = 9, 
-  endHour = 15,
+  endHour = 16,
   selectedSlot,
   onSlotSelect,
   displayDays = [1, 2, 3, 4, 5] // Default to Mon-Fri
 }: TimeGridProps) {
   const [weekOffset, setWeekOffset] = useState(0);
-  const hours = Array.from({ length: endHour - startHour + 1 }, (_, i) => startHour + i);
+  // endHour is exclusive: hours from startHour up to (but not including) endHour
+  const hours = Array.from({ length: endHour - startHour }, (_, i) => startHour + i);
   const dates = getDatesForDays(displayDays, weekOffset);
 
   const toggleSlot = (day: number, hour: number) => {
@@ -137,7 +138,10 @@ export function TimeGrid({
               const slotTime = new Date(d.fullDate);
               slotTime.setHours(hour, 0, 0, 0);
               const isPast = slotTime < new Date();
-              const isCellEditable = editable && !isPast;
+              // For availability grids (editable=true), all day-of-week slots are clickable
+              // because availability is a recurring weekly schedule, not date-specific.
+              // Only when weekOffset < 0 (viewing past weeks) do we block editing.
+              const isCellEditable = editable && weekOffset >= 0;
               const shouldDim = isPast && weekOffset < 0;
               
               let cellClass = `p-1 bg-white relative transition-colors ${idx < dates.length - 1 ? 'border-r border-border-subtle' : ''}`;
