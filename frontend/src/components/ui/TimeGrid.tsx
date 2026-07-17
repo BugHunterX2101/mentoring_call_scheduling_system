@@ -137,9 +137,8 @@ export function TimeGrid({
               const slotTime = new Date(d.fullDate);
               slotTime.setHours(hour, 0, 0, 0);
               const isPast = slotTime < new Date();
-              // For setting availability (editable=true), past slots shouldn't be disabled 
-              // because availability is a recurring schedule (e.g. Every Monday 9am)
-              const isCellEditable = editable;
+              const isCellEditable = editable && !isPast;
+              const shouldDim = isPast && weekOffset < 0;
               
               let cellClass = `p-1 bg-white relative transition-colors ${idx < dates.length - 1 ? 'border-r border-border-subtle' : ''}`;
               
@@ -154,14 +153,14 @@ export function TimeGrid({
                    const isSelected = selectedSlot?.day_of_week === day && selectedSlot?.start_time === slot.start_time;
                    if (isSelected) {
                      content = (
-                       <div className={`absolute inset-1 bg-primary text-white flex flex-col justify-center items-center rounded-sm z-10 shadow-md ${isPast ? 'opacity-50' : ''}`}>
+                       <div className={`absolute inset-1 bg-primary text-white flex flex-col justify-center items-center rounded-sm z-10 shadow-md ${shouldDim ? 'opacity-50' : ''}`}>
                          <span className="text-[10px] font-bold tracking-widest uppercase">Selected</span>
                        </div>
                      );
                    } else {
                      content = (
                        <div 
-                         className={`absolute inset-1 bg-blue-50 hover:bg-white text-primary flex flex-col justify-center items-center rounded-sm border-2 border-transparent hover:border-primary z-10 cursor-pointer transition-colors group ${isPast ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}`}
+                         className={`absolute inset-1 bg-blue-50 hover:bg-white text-primary flex flex-col justify-center items-center rounded-sm border-2 border-transparent hover:border-primary z-10 cursor-pointer transition-colors group ${shouldDim ? 'opacity-50' : ''} ${isPast ? 'cursor-not-allowed pointer-events-none' : ''}`}
                          onClick={() => { if (!isPast) onSlotSelect?.(slot); }}
                        >
                          <span className="text-[10px] font-bold tracking-widest uppercase opacity-0 group-hover:opacity-100 transition-opacity">Select</span>
@@ -170,7 +169,7 @@ export function TimeGrid({
                    }
                 } else if (slot.type === 'mentor' || slot.type === 'user' || slot.type === 'available' || isCellEditable) {
                    content = (
-                     <div className={`absolute inset-0 bg-primary text-white p-2 rounded-sm shadow-sm z-10 flex flex-col justify-start items-start m-1 ${isPast ? 'opacity-50' : ''}`}>
+                     <div className={`absolute inset-0 bg-primary text-white p-2 rounded-sm shadow-sm z-10 flex flex-col justify-start items-start m-1 ${shouldDim ? 'opacity-50' : ''}`}>
                        <span className="text-[9px] font-bold tracking-widest uppercase">Available</span>
                        <span className="text-[10px] font-bold">{hour.toString().padStart(2, '0')}:00 — {hour + 1}:00</span>
                      </div>
