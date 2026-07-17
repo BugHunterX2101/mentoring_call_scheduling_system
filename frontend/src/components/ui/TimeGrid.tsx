@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 export interface TimeSlot {
   day_of_week: number; // 0=Sunday, 1=Monday... 6=Saturday
@@ -21,10 +21,10 @@ interface TimeGridProps {
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 // Helper to get dates for the next week's given days
-function getDatesForDays(daysToDisplay: number[]) {
+function getDatesForDays(daysToDisplay: number[], weekOffset: number = 0) {
   const today = new Date();
   const currentWeekSunday = new Date(today);
-  currentWeekSunday.setDate(today.getDate() - today.getDay());
+  currentWeekSunday.setDate(today.getDate() - today.getDay() + (weekOffset * 7));
   
   return daysToDisplay.map(targetDay => {
     const date = new Date(currentWeekSunday);
@@ -32,7 +32,8 @@ function getDatesForDays(daysToDisplay: number[]) {
     return {
       dayOfWeek: targetDay,
       dayName: DAYS[targetDay],
-      dateNumber: date.getDate()
+      dateNumber: date.getDate(),
+      monthName: date.toLocaleDateString('en-US', { month: 'short' })
     };
   });
 }
@@ -47,8 +48,9 @@ export function TimeGrid({
   onSlotSelect,
   displayDays = [1, 2, 3, 4, 5] // Default to Mon-Fri
 }: TimeGridProps) {
+  const [weekOffset, setWeekOffset] = useState(0);
   const hours = Array.from({ length: endHour - startHour + 1 }, (_, i) => startHour + i);
-  const dates = getDatesForDays(displayDays);
+  const dates = getDatesForDays(displayDays, weekOffset);
 
   const toggleSlot = (day: number, hour: number) => {
     if (!editable || !onSlotsChange) return;
@@ -74,6 +76,27 @@ export function TimeGrid({
 
   return (
     <div className="border border-border-subtle rounded-sm overflow-hidden bg-white">
+      {/* Week Navigation */}
+      <div className="flex justify-between items-center p-3 border-b border-border-subtle bg-surface-container-lowest">
+        <h3 className="text-xs font-bold text-primary tracking-widest uppercase">
+          {weekOffset === 0 ? 'This Week' : weekOffset === 1 ? 'Next Week' : weekOffset === -1 ? 'Last Week' : `${weekOffset > 0 ? '+' : ''}${weekOffset} Weeks`}
+        </h3>
+        <div className="flex items-center gap-1">
+          <button 
+            onClick={() => setWeekOffset(w => w - 1)}
+            className="w-6 h-6 rounded border border-border-subtle flex items-center justify-center text-text-muted hover:bg-surface-container-low transition-colors"
+          >&lt;</button>
+          <button 
+            onClick={() => setWeekOffset(w => 0)}
+            className="px-2 h-6 rounded border border-border-subtle flex items-center justify-center text-[10px] font-bold text-text-muted hover:bg-surface-container-low transition-colors uppercase"
+          >Today</button>
+          <button 
+            onClick={() => setWeekOffset(w => w + 1)}
+            className="w-6 h-6 rounded border border-border-subtle flex items-center justify-center text-text-muted hover:bg-surface-container-low transition-colors"
+          >&gt;</button>
+        </div>
+      </div>
+
       {/* Header */}
       <div 
         className="grid border-b border-border-subtle" 
@@ -81,9 +104,12 @@ export function TimeGrid({
       >
         <div className="p-3 text-center text-xs font-medium text-text-muted border-r border-border-subtle"></div>
         {dates.map((d, idx) => (
-          <div key={d.dayOfWeek} className={`p-4 flex flex-col items-center justify-center ${idx < dates.length - 1 ? 'border-r border-border-subtle' : ''}`}>
-            <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">{d.dayName}</span>
-            <span className="text-xl font-bold text-primary">{d.dateNumber}</span>
+          <div key={d.dayOfWeek} className={`p-3 flex flex-col items-center justify-center ${idx < dates.length - 1 ? 'border-r border-border-subtle' : ''}`}>
+            <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-0.5">{d.dayName}</span>
+            <div className="flex items-baseline gap-1">
+               <span className="text-lg font-bold text-primary">{d.dateNumber}</span>
+               <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">{d.monthName}</span>
+            </div>
           </div>
         ))}
       </div>
