@@ -145,9 +145,9 @@ erDiagram
     REQUIREMENTS {
         uuid id PK
         uuid user_id FK
-        uuid assigned_mentor_id FK
-        varchar call_type
+        varchar call_type "validated against call_types table"
         text description
+        varchar priority "low, medium, high"
         varchar status "pending or matched or booked or rejected"
         timestamp created_at
     }
@@ -189,6 +189,13 @@ erDiagram
         timestamp updated_at
     }
 
+    CALL_TYPES {
+        serial id PK
+        varchar value UK "resume_revamp, career_pivot, etc."
+        varchar label
+        boolean is_active
+    }
+
     USERS ||--o| USER_PROFILES : "has profile"
     USERS ||--o| MENTOR_PROFILES : "has mentor profile"
     USERS ||--o{ REQUIREMENTS : "submits"
@@ -197,6 +204,7 @@ erDiagram
     REQUIREMENTS ||--o{ RECOMMENDATIONS : "generates"
     REQUIREMENTS ||--o| BOOKINGS : "results in"
     MENTOR_PROFILES ||--o{ RECOMMENDATIONS : "appears in"
+    CALL_TYPES ||--o{ REQUIREMENTS : "validates call_type"
 ```
 
 ---
@@ -249,12 +257,11 @@ sequenceDiagram
     Admin->>Frontend: Select overlap slot, Confirm Booking
     Frontend->>API: POST /bookings
     API->>DB: BEGIN TRANSACTION
-    API->>DB: INSERT bookings
+    API->>DB: INSERT bookings (status=confirmed)
     API->>DB: UPDATE requirements status=booked
-    API->>DB: DELETE used availability slots
     API->>DB: COMMIT
     API-->>Frontend: booking confirmed
-    Frontend-->>Admin: Navigate to Requirements Queue
+    Frontend-->>Admin: Navigate to Admin Dashboard
 ```
 
 ---
@@ -428,10 +435,11 @@ mentoring_call_scheduling_system/
 |       +-- app.js                    # Express app: CORS, JSON, route mounting
 |       |
 |       +-- config/
-|       |   +-- db.js                 # PostgreSQL pool (node-postgres)
-|       |   +-- schema.sql            # Table definitions
-|       |   +-- seed.js               # Demo data seeder
-|       |   +-- seedNames.js          # Name arrays for seed generation
+|       |   +-- db.js                       # PostgreSQL pool (node-postgres)
+|       |   +-- seed.js                     # Demo data seeder (tables + users + mentors)
+|       |   +-- seedNames.js                # Name arrays for seed generation
+|       |   +-- update_schema.js            # Migration: call_types table + mentor_profiles columns
+|       |   +-- fix_call_type_constraint.js # Migration: drop stale CHECK constraint on requirements
 |       |
 |       +-- middleware/
 |       |   +-- auth.middleware.js    # JWT verification, req.user injection
@@ -546,11 +554,17 @@ JWT_SECRET=your_super_secret_jwt_key_here
 GROQ_API_KEY=gsk_your_groq_api_key_here
 ```
 
-Initialize database and seed demo data:
+Initialize database, run migrations, and seed demo data:
 
 ```bash
-psql -d mentorque -f src/config/schema.sql
+# Run the main seeder (creates tables + inserts demo data)
 node src/config/seed.js
+
+# Run the schema updater (adds call_types table, extra mentor_profiles columns)
+node src/config/update_schema.js
+
+# Fix the call_type CHECK constraint to accept all 4 call types
+node src/config/fix_call_type_constraint.js
 ```
 
 Start the API server:
@@ -742,6 +756,28 @@ journey
 2. Create a feature branch: `git checkout -b feat/your-feature`
 3. Commit with a descriptive message following Conventional Commits
 4. Open a Pull Request
+
+---
+
+## Changelog
+
+A record of all significant bug fixes and improvements made to the platform.
+
+### v1.3 - Full System Audit (Latest)
+
+| Area | Fix |
+|---|---|
+| **Backend - AI Matching** | Fixed `ReferenceError: filteredCandidates is not defined` in `groqService.js` that crashed every filtered AI matching call |
+| **Backend - Bookings** | Removed destructive `DELETE FROM availability` that wiped mentor and mentee availability for the entire matched day after a booking |
+| **Backend - DB Constraint** | Dropped stale `requirements_call_type_check` CHECK constraint that blocked `career_pivot` and `system_architecture` submissions (only 2 of 4 call types worked) |
+| **Backend - Imports** | Removed dead `requireRole` import from `availability.routes.js` |
+| **Frontend - Auth Flow** | Fixed `login()` not being `await`ed in Login and Signup — prevented race condition where navigation fired before `AuthContext` finished setting the user state |
+| **Frontend - Routing** | Fixed admin post-login redirect from `/admin/requirements` to `/admin/dashboard` in Login, Signup, and RoleGuard |
+| **Frontend - UI** | Fixed `MatchingWorkspace` page title from generic "Schedule Overview" to "AI Matching Workspace" |
+| **Frontend - UX** | Added `setError('')` clearing on re-submission in Login so stale error messages don't persist |
+| **Frontend - TimeGrid** | Locked past date/time cells to prevent editing historical availability slots |
+| **Backend - Requirements** | Replaced hardcoded call-type whitelists with dynamic DB validation via the `call_types` table |
+| **Backend - Mentors** | Fixed SQL join (`user_profiles` vs `mentor_profiles`) that caused `column user_tags does not exist` error in mentor listing |
 
 ---
 
