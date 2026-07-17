@@ -24,6 +24,7 @@ const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 function getDatesForDays(daysToDisplay: number[], weekOffset: number = 0) {
   const today = new Date();
   const currentWeekSunday = new Date(today);
+  currentWeekSunday.setHours(0, 0, 0, 0);
   currentWeekSunday.setDate(today.getDate() - today.getDay() + (weekOffset * 7));
   
   return daysToDisplay.map(targetDay => {
@@ -33,7 +34,8 @@ function getDatesForDays(daysToDisplay: number[], weekOffset: number = 0) {
       dayOfWeek: targetDay,
       dayName: DAYS[targetDay],
       dateNumber: date.getDate(),
-      monthName: date.toLocaleDateString('en-US', { month: 'short' })
+      monthName: date.toLocaleDateString('en-US', { month: 'short' }),
+      fullDate: date
     };
   });
 }
@@ -131,9 +133,15 @@ export function TimeGrid({
             {dates.map((d, idx) => {
               const day = d.dayOfWeek;
               const slot = getSlot(day, hour);
+              
+              const slotTime = new Date(d.fullDate);
+              slotTime.setHours(hour, 0, 0, 0);
+              const isPast = slotTime < new Date();
+              const isCellEditable = editable && !isPast;
+              
               let cellClass = `p-1 bg-white relative transition-colors ${idx < dates.length - 1 ? 'border-r border-border-subtle' : ''}`;
               
-              if (editable) {
+              if (isCellEditable) {
                 cellClass += " cursor-pointer hover:bg-surface-container-low";
               }
               
@@ -144,23 +152,23 @@ export function TimeGrid({
                    const isSelected = selectedSlot?.day_of_week === day && selectedSlot?.start_time === slot.start_time;
                    if (isSelected) {
                      content = (
-                       <div className="absolute inset-1 bg-primary text-white flex flex-col justify-center items-center rounded-sm z-10 shadow-md">
+                       <div className={`absolute inset-1 bg-primary text-white flex flex-col justify-center items-center rounded-sm z-10 shadow-md ${isPast ? 'opacity-50' : ''}`}>
                          <span className="text-[10px] font-bold tracking-widest uppercase">Selected</span>
                        </div>
                      );
                    } else {
                      content = (
                        <div 
-                         className="absolute inset-1 bg-blue-50 hover:bg-white text-primary flex flex-col justify-center items-center rounded-sm border-2 border-transparent hover:border-primary z-10 cursor-pointer transition-colors group"
-                         onClick={() => onSlotSelect?.(slot)}
+                         className={`absolute inset-1 bg-blue-50 hover:bg-white text-primary flex flex-col justify-center items-center rounded-sm border-2 border-transparent hover:border-primary z-10 cursor-pointer transition-colors group ${isPast ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}`}
+                         onClick={() => { if (!isPast) onSlotSelect?.(slot); }}
                        >
                          <span className="text-[10px] font-bold tracking-widest uppercase opacity-0 group-hover:opacity-100 transition-opacity">Select</span>
                        </div>
                      );
                    }
-                } else if (slot.type === 'mentor' || slot.type === 'user' || slot.type === 'available' || editable) {
+                } else if (slot.type === 'mentor' || slot.type === 'user' || slot.type === 'available' || isCellEditable) {
                    content = (
-                     <div className="absolute inset-0 bg-primary text-white p-2 rounded-sm shadow-sm z-10 flex flex-col justify-start items-start m-1">
+                     <div className={`absolute inset-0 bg-primary text-white p-2 rounded-sm shadow-sm z-10 flex flex-col justify-start items-start m-1 ${isPast ? 'opacity-50' : ''}`}>
                        <span className="text-[9px] font-bold tracking-widest uppercase">Available</span>
                        <span className="text-[10px] font-bold">{hour.toString().padStart(2, '0')}:00 — {hour + 1}:00</span>
                      </div>
@@ -172,7 +180,7 @@ export function TimeGrid({
                 <div 
                   key={`${day}-${hour}`} 
                   className={cellClass}
-                  onClick={() => editable ? toggleSlot(day, hour) : null}
+                  onClick={() => isCellEditable ? toggleSlot(day, hour) : null}
                 >
                   <div className="w-full h-full border border-transparent rounded-sm group relative">
                      {content}
