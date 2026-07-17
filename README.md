@@ -290,36 +290,40 @@ mentoring_call_scheduling_system/
 |   |   |-- middleware/      # JWT auth (auth.middleware.js) and RBAC guards
 |   |   |-- modules/         # API Route Controllers
 |   |   |   |-- auth/        # Login & Signup routes with bcrypt
-|   |   |   |-- bookings/    # Overlap calculation & Session booking logic
+|   |   |   |-- availability/# Mentor scheduling slots & Overlap calculation (overlap.util.js)
+|   |   |   |-- bookings/    # Session booking logic & Lifecycle workflows (Cancel/Reject)
 |   |   |   |-- mentors/     # Mentor directory & active status toggling
 |   |   |   |-- recommendations/ # AI Matchmaking engine (groqService.js)
 |   |   |   |-- requirements/# Mentee requests & Batch Matching queue
 |   |   |   `-- settings/    # Dynamic Admin configurations & DB Backups
-|   |   `-- server.js        # Express application entry point
+|   |   `-- app.js           # Express application configuration
+|   |   `-- server.js        # Express server entry point
 |   |-- fixPasswords.js      # Utility script for hash migration
 |   |-- .env                 # Backend environment variables
 |   `-- package.json
 |
-`-- frontend/
-    |-- src/
-    |   |-- app/             # Application router (routes.tsx)
-    |   |-- components/
-    |   |   |-- layout/      # Shared dashboard layouts and sidebars
-    |   |   `-- ui/          # Reusable UI primitives (TimeGrid, TagPill)
-    |   |-- lib/
-    |   |   |-- api/         # Fetch wrapper with interceptors
-    |   |   `-- auth/        # AuthContext provider & state hooks
-    |   |-- pages/
-    |   |   |-- admin/       # RequirementsQueue, MatchingWorkspace, AdminSettings
-    |   |   |-- auth/        # Login.tsx & Signup.tsx interfaces
-    |   |   |-- mentor/      # MentorDashboard & confirmed calls
-    |   |   `-- user/        # MenteeDashboard & dynamic AI helper
-    |   |-- App.tsx          # Main Application shell
-    |   |-- index.css        # Tailwind directives
-    |   `-- main.tsx         # React root
-    |-- .env                 # Frontend environment variables
-    |-- tailwind.config.js   # Tailwind theme configuration
-    `-- vite.config.ts
+|-- frontend/
+|   |-- src/
+|   |   |-- app/             # Application router (routes.tsx)
+|   |   |-- components/
+|   |   |   |-- layout/      # Shared dashboard layouts and sidebars
+|   |   |   `-- ui/          # Reusable UI primitives (TimeGrid, TagPill)
+|   |   |-- lib/
+|   |   |   |-- api/         # Fetch wrapper with interceptors
+|   |   |   `-- auth/        # AuthContext provider & state hooks
+|   |   |-- pages/
+|   |   |   |-- admin/       # RequirementsQueue, MatchingWorkspace, AdminSettings
+|   |   |   |-- auth/        # Login.tsx & Signup.tsx interfaces
+|   |   |   |-- mentor/      # MentorDashboard & confirmed calls
+|   |   |   `-- user/        # MenteeDashboard & dynamic AI helper
+|   |   |-- App.tsx          # Main Application shell
+|   |   |-- index.css        # Tailwind directives
+|   |   `-- main.tsx         # React root
+|   |-- .env                 # Frontend environment variables
+|   |-- tailwind.config.js   # Tailwind theme configuration
+|   `-- vite.config.ts
+|
+`-- vercel.json              # Unified Vercel Monorepo routing & build configuration
 ```
 
 ---
