@@ -77,17 +77,29 @@ export function TimeGrid({
     return slots.find(s => s.day_of_week === day && s.start_time.startsWith(start_time.substring(0, 2)));
   };
 
+  const now = new Date();
+
   return (
     <div className="border border-border-subtle rounded-sm overflow-hidden bg-white">
       {/* Week Navigation */}
       <div className="flex justify-between items-center p-3 border-b border-border-subtle bg-surface-container-lowest">
-        <h3 className="text-xs font-bold text-primary tracking-widest uppercase">
-          {weekOffset === 0 ? 'This Week' : weekOffset === 1 ? 'Next Week' : weekOffset === -1 ? 'Last Week' : `${weekOffset > 0 ? '+' : ''}${weekOffset} Weeks`}
-        </h3>
+        <div className="flex items-center gap-3">
+          <h3 className="text-xs font-bold text-primary tracking-widest uppercase">
+            {weekOffset === 0 ? 'This Week' : weekOffset === 1 ? 'Next Week' : weekOffset === -1 ? 'Last Week' : `${weekOffset > 0 ? '+' : ''}${weekOffset} Weeks`}
+          </h3>
+          {editable && (
+            <span className="text-[10px] font-medium text-text-muted bg-surface-container-low px-2 py-0.5 rounded-full flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-gray-300" style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(0,0,0,0.1) 2px, rgba(0,0,0,0.1) 4px)' }}></span>
+              Past time is read-only
+            </span>
+          )}
+        </div>
         <div className="flex items-center gap-1">
           <button 
             onClick={() => setWeekOffset(w => w - 1)}
-            className="w-6 h-6 rounded border border-border-subtle flex items-center justify-center text-text-muted hover:bg-surface-container-low transition-colors"
+            disabled={weekOffset <= 0}
+            title={weekOffset <= 0 ? 'Cannot navigate to past weeks' : 'Previous week'}
+            className="w-6 h-6 rounded border border-border-subtle flex items-center justify-center text-text-muted hover:bg-surface-container-low transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
           >&lt;</button>
           <button 
             onClick={() => setWeekOffset(0)}
@@ -135,47 +147,75 @@ export function TimeGrid({
               const day = d.dayOfWeek;
               const slot = getSlot(day, hour);
               
+              // Compute the exact datetime this cell represents
               const slotTime = new Date(d.fullDate);
               slotTime.setHours(hour, 0, 0, 0);
-              const isPast = slotTime < new Date();
-              // For availability grids (editable=true), all day-of-week slots are clickable
-              // because availability is a recurring weekly schedule, not date-specific.
-              // Only when weekOffset < 0 (viewing past weeks) do we block editing.
-              const isCellEditable = editable && weekOffset >= 0;
-              const shouldDim = isPast && weekOffset < 0;
+              // A cell is in the past if its start datetime has already passed
+              const isPast = slotTime <= now;
+              // A cell is only editable if it is editable-mode AND its exact datetime is in the future
+              const isCellEditable = editable && !isPast;
+              // Dim past cells when in view-only mode (non-editable), or always dim past cells
+              const shouldDim = isPast;
               
-              let cellClass = `p-1 bg-white relative transition-colors ${idx < dates.length - 1 ? 'border-r border-border-subtle' : ''}`;
+              let cellClass = `p-1 relative transition-colors ${idx < dates.length - 1 ? 'border-r border-border-subtle' : ''}`;
               
-              if (isCellEditable) {
-                cellClass += " cursor-pointer hover:bg-surface-container-low";
+              if (isPast) {
+                // Past cells: grey striped pattern, no interaction
+                cellClass += ' bg-gray-50 cursor-not-allowed';
+              } else if (isCellEditable) {
+                cellClass += ' bg-white cursor-pointer hover:bg-surface-container-low';
+              } else {
+                cellClass += ' bg-white';
               }
               
               let content = null;
               
+              if (isPast) {
+                // Show subtle hatching overlay on past cells
+                content = (
+                  <div
+                    className="absolute inset-0 rounded-sm pointer-events-none"
+                    style={{
+                      backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(0,0,0,0.04) 4px, rgba(0,0,0,0.04) 8px)'
+                    }}
+                  />
+                );
+              }
+
               if (slot) {
                 if (slot.type === 'overlap') {
                    const isSelected = selectedSlot?.day_of_week === day && selectedSlot?.start_time === slot.start_time;
                    if (isSelected) {
                      content = (
-                       <div className={`absolute inset-1 bg-primary text-white flex flex-col justify-center items-center rounded-sm z-10 shadow-md ${shouldDim ? 'opacity-50' : ''}`}>
+                       <div className={`absolute inset-1 bg-primary text-white flex flex-col justify-center items-center rounded-sm z-10 shadow-md ${shouldDim ? 'opacity-40' : ''}`}>
                          <span className="text-[10px] font-bold tracking-widest uppercase">Selected</span>
                        </div>
                      );
                    } else {
                      content = (
                        <div 
-                         className={`absolute inset-1 bg-blue-50 hover:bg-white text-primary flex flex-col justify-center items-center rounded-sm border-2 border-transparent hover:border-primary z-10 cursor-pointer transition-colors group ${shouldDim ? 'opacity-50' : ''} ${isPast ? 'cursor-not-allowed pointer-events-none' : ''}`}
+                         className={`absolute inset-1 bg-blue-50 text-primary flex flex-col justify-center items-center rounded-sm border-2 border-transparent z-10 transition-colors group
+                           ${isPast
+                             ? 'opacity-40 cursor-not-allowed pointer-events-none'
+                             : 'hover:bg-white hover:border-primary cursor-pointer'
+                           }`}
                          onClick={() => { if (!isPast) onSlotSelect?.(slot); }}
                        >
-                         <span className="text-[10px] font-bold tracking-widest uppercase opacity-0 group-hover:opacity-100 transition-opacity">Select</span>
+                         {!isPast && (
+                           <span className="text-[10px] font-bold tracking-widest uppercase opacity-0 group-hover:opacity-100 transition-opacity">Select</span>
+                         )}
                        </div>
                      );
                    }
-                } else if (slot.type === 'mentor' || slot.type === 'user' || slot.type === 'available' || isCellEditable) {
+                } else if (slot.type === 'mentor' || slot.type === 'user' || slot.type === 'available') {
                    content = (
-                     <div className={`absolute inset-0 bg-primary text-white p-2 rounded-sm shadow-sm z-10 flex flex-col justify-start items-start m-1 ${shouldDim ? 'opacity-50' : ''}`}>
+                     <div className={`absolute inset-0 p-2 rounded-sm shadow-sm z-10 flex flex-col justify-start items-start m-1
+                       ${isPast
+                         ? 'bg-gray-400 text-white opacity-40'
+                         : 'bg-primary text-white'
+                       }`}>
                        <span className="text-[9px] font-bold tracking-widest uppercase">Available</span>
-                       <span className="text-[10px] font-bold">{hour.toString().padStart(2, '0')}:00 — {hour + 1}:00</span>
+                       <span className="text-[10px] font-bold">{hour.toString().padStart(2, '0')}:00 - {hour + 1}:00</span>
                      </div>
                    );
                 }
@@ -185,9 +225,10 @@ export function TimeGrid({
                 <div 
                   key={`${day}-${hour}`} 
                   className={cellClass}
-                  onClick={() => isCellEditable ? toggleSlot(day, hour) : null}
+                  onClick={() => { if (isCellEditable) toggleSlot(day, hour); }}
+                  title={isPast ? 'Past slots cannot be edited' : undefined}
                 >
-                  <div className="w-full h-full border border-transparent rounded-sm group relative">
+                  <div className="w-full h-full border border-transparent rounded-sm group relative min-h-[58px]">
                      {content}
                   </div>
                 </div>
