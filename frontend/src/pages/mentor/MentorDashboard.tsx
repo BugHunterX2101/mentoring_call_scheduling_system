@@ -13,16 +13,16 @@ export function MentorDashboard() {
   const fetchData = useCallback(async () => {
     try {
       const [bookingsData, availData, perfData] = await Promise.all([
-        apiClient.fetch('/bookings/me'),
-        apiClient.fetch('/availability/me'),
+        apiClient.fetch('/bookings/me').catch(() => ({ bookings: [] })),
+        apiClient.fetch('/availability/me').catch(() => ({ slots: [] })),
         apiClient.fetch('/mentors/me/performance').catch(() => ({ score: 0, metric: 'No ratings yet' }))
       ]);
-      
+
       setBookings(bookingsData.bookings || []);
       if (perfData && perfData.score !== undefined) {
         setPerformance(perfData);
       }
-      
+
       if (availData.slots) {
         setSlots(availData.slots.map((s: any) => ({
           day_of_week: s.day_of_week,
@@ -32,9 +32,10 @@ export function MentorDashboard() {
         })));
       }
     } catch (error) {
-      console.error(error);
+      console.error('fetchData failed:', error);
     }
   }, []);
+
 
   useEffect(() => {
     fetchData();

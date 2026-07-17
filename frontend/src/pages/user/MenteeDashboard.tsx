@@ -31,24 +31,24 @@ export function MenteeDashboard() {
 
   const fetchData = useCallback(async () => {
     try {
+      // Fetch all data independently so one failure doesn't block others
       const [reqsData, bookingsData, availData, aiData, typesData] = await Promise.all([
-        apiClient.fetch('/requirements/me'),
-        apiClient.fetch('/bookings/me'),
-        apiClient.fetch('/availability/me'),
-        apiClient.fetch('/recommendations/summary'),
-        apiClient.fetch('/settings/call-types').catch(() => ({ callTypes: [] }))
+        apiClient.fetch('/requirements/me').catch(() => ({ requirements: [] })),
+        apiClient.fetch('/bookings/me').catch(() => ({ bookings: [] })),
+        apiClient.fetch('/availability/me').catch(() => ({ slots: [] })),
+        apiClient.fetch('/recommendations/summary').catch(() => null),
+        apiClient.fetch('/settings/call-types').catch(() => ({ callTypes: [] })),
       ]);
+
       setRequirements(reqsData.requirements || []);
       setBookings(bookingsData.bookings || []);
-      setAiSummary(aiData);
+      if (aiData) setAiSummary(aiData);
       if (typesData.callTypes && typesData.callTypes.length > 0) {
         setCallTypesList(typesData.callTypes);
-        // default select to first if not matches
         if (!typesData.callTypes.find((t: any) => t.value === callType)) {
           setCallType(typesData.callTypes[0].value);
         }
       }
-      
       if (availData.slots) {
         setSlots(availData.slots.map((s: any) => ({
           day_of_week: s.day_of_week,
@@ -58,10 +58,11 @@ export function MenteeDashboard() {
         })));
       }
     } catch (error) {
-      console.error(error);
+      console.error('fetchData failed:', error);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
 
   useEffect(() => {
     fetchData();

@@ -12,8 +12,22 @@ const settingsRoutes = require('./modules/settings/settings.routes');
 
 const app = express();
 
+// Request logger for debugging auth/role issues
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const ms = Date.now() - start;
+    const role = req.user?.role || 'anon';
+    if (res.statusCode >= 400) {
+      console.log(`[${res.statusCode}] ${req.method} ${req.path} (role=${role}) ${ms}ms`);
+    }
+  });
+  next();
+});
+
 app.use(cors());
 app.use(express.json());
+
 
 app.use('/api/auth', authRoutes);
 app.use('/api/availability', availabilityRoutes);
