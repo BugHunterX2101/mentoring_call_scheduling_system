@@ -102,11 +102,11 @@ export function MatchingWorkspace() {
     return `${dayName} @ ${startTime}`;
   };
 
-  if (loadingReq) return <DashboardLayout><p className="p-8 text-text-muted">Loading workspace...</p></DashboardLayout>;
-  if (!requirement) return <DashboardLayout><p className="p-8 text-text-muted">Requirement not found</p></DashboardLayout>;
+  if (loadingReq) return <DashboardLayout title="AI Matching Workspace" searchPlaceholder="Search resources..."><p className="p-8 text-text-muted">Loading workspace...</p></DashboardLayout>;
+  if (!requirement) return <DashboardLayout title="AI Matching Workspace" searchPlaceholder="Search resources..."><p className="p-8 text-text-muted">Requirement not found</p></DashboardLayout>;
 
   return (
-    <DashboardLayout title="Schedule Overview" searchPlaceholder="Search resources...">
+    <DashboardLayout title="AI Matching Workspace" searchPlaceholder="Search resources...">
       <div className="flex gap-6 items-start h-[calc(100vh-140px)]">
         
         {/* Left Column: Mentee Requirement Details */}

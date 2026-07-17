@@ -35,8 +35,7 @@ async function getRecommendationsForRequirement(requirementId) {
   if (tagFilter) {
     const strictFilter = candidates.filter(c => (c.tags || []).includes(tagFilter));
     if (strictFilter.length > 0) {
-      filteredCandidates = strictFilter;
-      candidates = filteredCandidates;
+      candidates = strictFilter;
     }
   }
 

@@ -14,7 +14,7 @@ export function Signup() {
 
   useEffect(() => {
     if (user) {
-      if (user.role === 'admin') navigate('/admin/requirements', { replace: true });
+      if (user.role === 'admin') navigate('/admin/dashboard', { replace: true });
       else if (user.role === 'mentor') navigate('/mentor/dashboard', { replace: true });
       else navigate('/user/dashboard', { replace: true });
     }
@@ -48,9 +48,9 @@ export function Signup() {
           role 
         }),
       });
-      login(data.token, data.user);
+      await login(data.token, data.user);
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || 'Signup failed. Please try again.');
     }
   };
 

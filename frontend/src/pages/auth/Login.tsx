@@ -12,7 +12,7 @@ export function Login() {
 
   useEffect(() => {
     if (user) {
-      if (user.role === 'admin') navigate('/admin/requirements', { replace: true });
+      if (user.role === 'admin') navigate('/admin/dashboard', { replace: true });
       else if (user.role === 'mentor') navigate('/mentor/dashboard', { replace: true });
       else navigate('/user/dashboard', { replace: true });
     }
@@ -20,14 +20,16 @@ export function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     try {
       const data = await apiClient.fetch('/auth/login', {
         method: 'POST',
         body: JSON.stringify({ email: email.trim(), password: password.trim() }),
       });
-      login(data.token, data.user);
+      // await login so AuthContext finishes setting user before navigation effect fires
+      await login(data.token, data.user);
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || 'Login failed. Please check your credentials.');
     }
   };
 

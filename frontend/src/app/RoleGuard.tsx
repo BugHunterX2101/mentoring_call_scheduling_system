@@ -27,7 +27,8 @@ export function RoleGuard({ children, allowedRoles }: RoleGuardProps) {
 
   if (!allowedRoles.includes(user.role)) {
     // Redirect based on role
-    if (user.role === 'admin') return <Navigate to="/admin/requirements" replace />;
+    if (user.role === 'admin') return <Navigate to="/admin/dashboard" replace />;
+
     if (user.role === 'mentor') return <Navigate to="/mentor/dashboard" replace />;
     return <Navigate to="/user/dashboard" replace />;
   }

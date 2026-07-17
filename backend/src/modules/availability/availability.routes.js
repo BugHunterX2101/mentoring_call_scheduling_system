@@ -1,6 +1,6 @@
 const express = require('express');
 const db = require('../../config/db');
-const { requireAuth, requireRole } = require('../../middleware/auth.middleware');
+const { requireAuth } = require('../../middleware/auth.middleware');
 const { requireRole: rbac } = require('../../middleware/rbac.middleware');
 const { calculateOverlap } = require('./overlap.util');
 
