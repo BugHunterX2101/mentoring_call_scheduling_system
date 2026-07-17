@@ -24,7 +24,7 @@ router.post('/', requireAuth, rbac(['admin']), async (req, res) => {
     // Remove slots from both pools (In a real system, you'd match by date/time, 
     // for this v1 we might just delete overlap slots or assume fixed windows.
     // For simplicity, we just clear the matching day_of_week slots for both.)
-    const day = new Date(startTime).toLocaleString('en-us', {weekday:'long'});
+    const day = new Date(startTime).getDay();
     await db.query(`DELETE FROM availability WHERE owner_id IN ($1, $2) AND day_of_week = $3`, [userId, mentorId, day]);
     
     await db.query('COMMIT');

@@ -154,7 +154,12 @@ router.delete('/:id', requireAuth, async (req, res) => {
       return res.status(403).json({ error: 'Forbidden' });
     }
     
-    // If it's already booked and not an admin, might want to restrict, but let's just allow deletion.
+    // Prevent postgres foreign key error if bookings exist
+    const bookingRes = await db.query('SELECT id FROM bookings WHERE requirement_id = $1', [req.params.id]);
+    if (bookingRes.rows.length > 0) {
+      return res.status(400).json({ error: 'Cannot delete requirement with active bookings. Please cancel the booking first.' });
+    }
+    
     await db.query('DELETE FROM requirements WHERE id = $1', [req.params.id]);
     res.json({ success: true });
   } catch (error) {
