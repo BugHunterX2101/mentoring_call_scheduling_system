@@ -137,7 +137,9 @@ export function TimeGrid({
               const slotTime = new Date(d.fullDate);
               slotTime.setHours(hour, 0, 0, 0);
               const isPast = slotTime < new Date();
-              const isCellEditable = editable && !isPast;
+              // For setting availability (editable=true), past slots shouldn't be disabled 
+              // because availability is a recurring schedule (e.g. Every Monday 9am)
+              const isCellEditable = editable;
               
               let cellClass = `p-1 bg-white relative transition-colors ${idx < dates.length - 1 ? 'border-r border-border-subtle' : ''}`;
               
