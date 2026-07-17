@@ -65,8 +65,12 @@ router.get('/me/performance', requireAuth, rbac(['mentor']), async (req, res) =>
     
     const mentorTags = mentorRes.rows[0].tags || [];
     
-    // 2. Get all pending requirements
-    const reqRes = await db.query("SELECT user_tags FROM requirements WHERE status = 'pending'");
+    // 2. Get all pending requirements with user tags via join
+    const reqRes = await db.query(
+      `SELECT p.tags AS user_tags FROM requirements r 
+       LEFT JOIN user_profiles p ON r.user_id = p.user_id 
+       WHERE r.status = 'pending'`
+    );
     const totalPending = reqRes.rows.length;
     
     if (totalPending === 0) {

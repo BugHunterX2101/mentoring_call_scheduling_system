@@ -7,22 +7,29 @@ const router = express.Router();
 
 router.post('/', requireAuth, rbac(['user']), async (req, res) => {
   const { callType, description, tags } = req.body;
-  const validCallTypes = ['resume_revamp', 'career_pivot', 'system_architecture', 'job_market_guidance', 'mock_interview'];
-  
-  if (!validCallTypes.includes(callType)) {
-    return res.status(400).json({ error: 'Invalid call type provided' });
+
+  if (!callType || !description) {
+    return res.status(400).json({ error: 'callType and description are required' });
   }
 
   try {
+    // Validate callType dynamically against the call_types table
+    const validCheck = await db.query(
+      'SELECT value FROM call_types WHERE value = $1 AND is_active = true',
+      [callType]
+    );
+    if (validCheck.rows.length === 0) {
+      return res.status(400).json({ error: `Invalid call type: "${callType}". Please select a valid option.` });
+    }
+
     const result = await db.query(
       `INSERT INTO requirements (user_id, call_type, description, status) 
        VALUES ($1, $2, $3, 'pending') RETURNING *`,
       [req.user.id, callType, description]
     );
     
-    // For v1, tags might just be updated on user_profiles if needed, or stored in requirement.
-    // The schema didn't have tags on requirements table, so we use user_profiles tags as requested.
-    if (tags) {
+    // Update user_profiles tags if provided
+    if (tags && Array.isArray(tags) && tags.length > 0) {
       await db.query('UPDATE user_profiles SET tags = $1 WHERE user_id = $2', [JSON.stringify(tags), req.user.id]);
     }
 
@@ -32,6 +39,7 @@ router.post('/', requireAuth, rbac(['user']), async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 router.get('/me', requireAuth, async (req, res) => {
   try {

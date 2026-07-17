@@ -24,6 +24,8 @@ export function MenteeDashboard() {
   // UI States
   const [expandedReqId, setExpandedReqId] = useState<string | null>(null);
   const [showAllHistory, setShowAllHistory] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [submitError, setSubmitError] = useState<string>('');
   
   // Date Calculation logic removed (handled by TimeGrid)
 
@@ -98,6 +100,9 @@ export function MenteeDashboard() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!description.trim()) return;
+    setSubmitStatus('submitting');
+    setSubmitError('');
     try {
       await apiClient.fetch('/requirements', {
         method: 'POST',
@@ -105,9 +110,14 @@ export function MenteeDashboard() {
       });
       setDescription('');
       setTags([]);
-      fetchData(); // Auto-refresh UI
-    } catch (e) {
-      console.error(e);
+      setSubmitStatus('success');
+      setTimeout(() => setSubmitStatus('idle'), 3000);
+      fetchData();
+    } catch (err: any) {
+      console.error(err);
+      setSubmitError(err.message || 'Failed to submit request. Please try again.');
+      setSubmitStatus('error');
+      setTimeout(() => setSubmitStatus('idle'), 5000);
     }
   };
 
@@ -243,8 +253,30 @@ export function MenteeDashboard() {
                 </div>
               </div>
               
-              <button type="submit" className="w-full bg-primary text-white py-3 rounded text-sm font-bold hover:bg-primary/90 transition-colors mt-2 shadow-sm">
-                Post Request
+              {submitStatus === 'error' && submitError && (
+                <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs font-medium">
+                  {submitError}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={submitStatus === 'submitting'}
+                className={`w-full text-white py-3 rounded text-sm font-bold transition-colors mt-2 shadow-sm disabled:opacity-60 ${
+                  submitStatus === 'success'
+                    ? 'bg-green-600 hover:bg-green-700'
+                    : submitStatus === 'error'
+                    ? 'bg-red-500 hover:bg-red-600'
+                    : 'bg-primary hover:bg-primary/90'
+                }`}
+              >
+                {submitStatus === 'submitting'
+                  ? 'Posting...'
+                  : submitStatus === 'success'
+                  ? '✓ Request Posted!'
+                  : submitStatus === 'error'
+                  ? 'Failed – Try Again'
+                  : 'Post Request'}
               </button>
             </form>
           </div>
